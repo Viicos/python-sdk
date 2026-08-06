@@ -6,20 +6,17 @@ Regenerate with `scripts/gen_surface_types.py` from `schema/2026-07-28.json`
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal, Union
+from typing import Any, Literal, Union
 
-from mcp_types._wire_base import WireModel
-from pydantic import ConfigDict, Field, RootModel
+from dataclasses import dataclass
 
 
-class BaseMetadata(WireModel):
+@dataclass(kw_only=True)
+class BaseMetadata:
     """
     Base interface for metadata with name (identifier) and title (display name) properties.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     name: str
     """
     Intended for programmatic or logical use, but used as a display name in past specs or fallback (if title isn't present).
@@ -35,24 +32,20 @@ class BaseMetadata(WireModel):
     """
 
 
-class BooleanSchema(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class BooleanSchema:
     default: bool | None = None
     description: str | None = None
     title: str | None = None
     type: Literal["boolean"]
 
 
-class Argument(WireModel):
+@dataclass(kw_only=True)
+class Argument:
     """
     The argument's information
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     name: str
     """
     The name of the argument
@@ -63,25 +56,21 @@ class Argument(WireModel):
     """
 
 
-class Context(WireModel):
+@dataclass(kw_only=True)
+class Context:
     """
     Additional, optional context for completions
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     arguments: dict[str, str] | None = None
     """
     Previously-resolved variables in a URI template or prompt.
     """
 
 
-class Completion(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    has_more: Annotated[bool | None, Field(alias="hasMore")] = None
+@dataclass(kw_only=True)
+class Completion:
+    has_more: bool | None = None
     """
     Indicates whether there are additional completion options beyond those provided in the current response, even if the exact total is unknown.
     """
@@ -89,42 +78,39 @@ class Completion(WireModel):
     """
     The total number of completion options available. This can exceed the number of values actually sent in the response.
     """
-    values: Annotated[list[str], Field(max_length=100)]
+    values: list[str]
     """
     An array of completion values. Must not exceed 100 items.
     """
 
 
-class Cursor(RootModel[str]):
+@dataclass(kw_only=True)
+class Cursor:
     root: str
     """
     An opaque token used to represent a cursor for pagination.
     """
 
 
-class RequestedSchema(WireModel):
+@dataclass(kw_only=True)
+class RequestedSchema:
     """
     A restricted subset of JSON Schema.
     Only top-level properties are allowed, without nesting.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    schema_: Annotated[str | None, Field(alias="$schema")] = None
+    schema_: str | None = None
     properties: dict[str, Any]
     required: list[str] | None = None
     type: Literal["object"]
 
 
-class ElicitRequestFormParams(WireModel):
+@dataclass(kw_only=True)
+class ElicitRequestFormParams:
     """
     The parameters for a request to elicit non-sensitive information from the user via a form in the client.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     message: str
     """
     The message to present to the user describing what information is being requested.
@@ -133,21 +119,19 @@ class ElicitRequestFormParams(WireModel):
     """
     The elicitation mode.
     """
-    requested_schema: Annotated[RequestedSchema, Field(alias="requestedSchema")]
+    requested_schema: RequestedSchema
     """
     A restricted subset of JSON Schema.
     Only top-level properties are allowed, without nesting.
     """
 
 
-class ElicitRequestURLParams(WireModel):
+@dataclass(kw_only=True)
+class ElicitRequestURLParams:
     """
     The parameters for a request to elicit information from the user via a URL in the client.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     message: str
     """
     The message to present to the user explaining why the interaction is needed.
@@ -162,14 +146,12 @@ class ElicitRequestURLParams(WireModel):
     """
 
 
-class ElicitResult(WireModel):
+@dataclass(kw_only=True)
+class ElicitResult:
     """
     The result returned by the client for an {@link ElicitRequestelicitation/create} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     action: Literal["accept", "cancel", "decline"]
     """
     The user action in response to the elicitation.
@@ -185,10 +167,8 @@ class ElicitResult(WireModel):
     """
 
 
-class Error(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class Error:
     code: int
     """
     The error type that occurred.
@@ -203,25 +183,21 @@ class Error(WireModel):
     """
 
 
+@dataclass(kw_only=True)
 class Error1(Error):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32020]
     """
     The error type that occurred.
     """
 
 
-class Icon(WireModel):
+@dataclass(kw_only=True)
+class Icon:
     """
     An optionally-sized icon that can be displayed in a user interface.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+    mime_type: str | None = None
     """
     Optional MIME type override if the source MIME type is missing or generic.
     For example: `"image/png"`, `"image/jpeg"`, or `"image/svg+xml"`.
@@ -254,14 +230,12 @@ class Icon(WireModel):
     """
 
 
-class Icons(WireModel):
+@dataclass(kw_only=True)
+class Icons:
     """
     Base interface to add `icons` property.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     icons: list[Icon] | None = None
     """
     Optional set of sized icons that the client can display in a user interface.
@@ -276,14 +250,12 @@ class Icons(WireModel):
     """
 
 
-class Implementation(WireModel):
+@dataclass(kw_only=True)
+class Implementation:
     """
     Describes the MCP implementation.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     description: str | None = None
     """
     An optional human-readable description of what this implementation does.
@@ -321,20 +293,18 @@ class Implementation(WireModel):
     """
     The version of this implementation.
     """
-    website_url: Annotated[str | None, Field(alias="websiteUrl")] = None
+    website_url: str | None = None
     """
     An optional URL of the website for this implementation.
     """
 
 
-class InternalError(WireModel):
+@dataclass(kw_only=True)
+class InternalError:
     """
     A JSON-RPC error indicating that an internal error occurred on the receiver. This error is returned when the receiver encounters an unexpected condition that prevents it from fulfilling the request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32603]
     """
     The error type that occurred.
@@ -349,7 +319,8 @@ class InternalError(WireModel):
     """
 
 
-class InvalidParamsError(WireModel):
+@dataclass(kw_only=True)
+class InvalidParamsError:
     """
     A JSON-RPC error indicating that the method parameters are invalid or malformed.
 
@@ -363,9 +334,6 @@ class InvalidParamsError(WireModel):
     - **Sampling**: Missing tool result or tool results mixed with other content
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32602]
     """
     The error type that occurred.
@@ -380,14 +348,12 @@ class InvalidParamsError(WireModel):
     """
 
 
-class InvalidRequestError(WireModel):
+@dataclass(kw_only=True)
+class InvalidRequestError:
     """
     A JSON-RPC error indicating that the request is not a valid request object. This error is returned when the message structure does not conform to the JSON-RPC 2.0 specification requirements for a request (e.g., missing required fields like `jsonrpc` or `method`, or using invalid types for these fields).
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32600]
     """
     The error type that occurred.
@@ -402,32 +368,28 @@ class InvalidRequestError(WireModel):
     """
 
 
-class JSONRPCNotification(WireModel):
+@dataclass(kw_only=True)
+class JSONRPCNotification:
     """
     A notification which does not expect a response.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: str
     params: dict[str, Any] | None = None
 
 
-class LegacyTitledEnumSchema(WireModel):
+@dataclass(kw_only=True)
+class LegacyTitledEnumSchema:
     """
     Use {@link TitledSingleSelectEnumSchema} instead.
     This interface will be removed in a future version.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     default: str | None = None
     description: str | None = None
     enum: list[str]
-    enum_names: Annotated[list[str] | None, Field(alias="enumNames")] = None
+    enum_names: list[str] | None = None
     """
     (Legacy) Display names for enum values.
     Non-standard according to JSON schema 2020-12.
@@ -436,20 +398,8 @@ class LegacyTitledEnumSchema(WireModel):
     type: Literal["string"]
 
 
-class LoggingLevel(
-    RootModel[
-        Literal[
-            "alert",
-            "critical",
-            "debug",
-            "emergency",
-            "error",
-            "info",
-            "notice",
-            "warning",
-        ]
-    ]
-):
+@dataclass(kw_only=True)
+class LoggingLevel:
     root: Literal["alert", "critical", "debug", "emergency", "error", "info", "notice", "warning"]
     """
     The severity of a log message.
@@ -459,7 +409,8 @@ class LoggingLevel(
     """
 
 
-class MetaObject(WireModel):
+@dataclass(kw_only=True)
+class MetaObject:
     """
     Represents the contents of a `_meta` field, which clients and servers use to attach additional metadata to their interactions.
 
@@ -478,12 +429,9 @@ class MetaObject(WireModel):
     - Interior characters may be alphanumeric, hyphens (`-`), underscores (`_`), or dots (`.`).
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
 
-
-class MethodNotFoundError(WireModel):
+@dataclass(kw_only=True)
+class MethodNotFoundError:
     """
     A JSON-RPC error indicating that the requested method does not exist or is not available.
 
@@ -492,9 +440,6 @@ class MethodNotFoundError(WireModel):
     A request that requires a client capability the client did not declare is signalled instead by {@link MissingRequiredClientCapabilityError} (`-32021`).
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32601]
     """
     The error type that occurred.
@@ -509,7 +454,8 @@ class MethodNotFoundError(WireModel):
     """
 
 
-class ModelHint(WireModel):
+@dataclass(kw_only=True)
+class ModelHint:
     """
     Hints to use for model selection.
 
@@ -517,9 +463,6 @@ class ModelHint(WireModel):
     to the client to interpret.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     name: str | None = None
     """
     A hint for a model name.
@@ -534,7 +477,8 @@ class ModelHint(WireModel):
     """
 
 
-class ModelPreferences(WireModel):
+@dataclass(kw_only=True)
+class ModelPreferences:
     """
     The server's preferences for model selection, requested of the client during sampling.
 
@@ -549,10 +493,7 @@ class ModelPreferences(WireModel):
     balance them against other considerations.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    cost_priority: Annotated[float | None, Field(alias="costPriority", ge=0.0, le=1.0)] = None
+    cost_priority: float | None = None
     """
     How much to prioritize cost when selecting a model. A value of 0 means cost
     is not important, while a value of 1 means cost is the most important
@@ -568,13 +509,13 @@ class ModelPreferences(WireModel):
     The client SHOULD prioritize these hints over the numeric priorities, but
     MAY still use the priorities to select from ambiguous matches.
     """
-    intelligence_priority: Annotated[float | None, Field(alias="intelligencePriority", ge=0.0, le=1.0)] = None
+    intelligence_priority: float | None = None
     """
     How much to prioritize intelligence and capabilities when selecting a
     model. A value of 0 means intelligence is not important, while a value of 1
     means intelligence is the most important factor.
     """
-    speed_priority: Annotated[float | None, Field(alias="speedPriority", ge=0.0, le=1.0)] = None
+    speed_priority: float | None = None
     """
     How much to prioritize sampling speed (latency) when selecting a model. A
     value of 0 means speed is not important, while a value of 1 means speed is
@@ -582,18 +523,14 @@ class ModelPreferences(WireModel):
     """
 
 
-class Notification(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class Notification:
     method: str
     params: dict[str, Any] | None = None
 
 
-class NumberSchema(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class NumberSchema:
     default: int | float | None = None
     description: str | None = None
     maximum: int | float | None = None
@@ -602,14 +539,12 @@ class NumberSchema(WireModel):
     type: Literal["integer", "number"]
 
 
-class ParseError(WireModel):
+@dataclass(kw_only=True)
+class ParseError:
     """
     A JSON-RPC error indicating that invalid JSON was received by the server. This error is returned when the server cannot parse the JSON text of a message.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32700]
     """
     The error type that occurred.
@@ -624,21 +559,20 @@ class ParseError(WireModel):
     """
 
 
-class ProgressToken(RootModel[str | int]):
+@dataclass(kw_only=True)
+class ProgressToken:
     root: str | int
     """
     A progress token, used to associate progress notifications with the original request.
     """
 
 
-class PromptArgument(WireModel):
+@dataclass(kw_only=True)
+class PromptArgument:
     """
     Describes an argument that a prompt can accept.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     description: str | None = None
     """
     A human-readable description of the argument.
@@ -662,14 +596,12 @@ class PromptArgument(WireModel):
     """
 
 
-class PromptReference(WireModel):
+@dataclass(kw_only=True)
+class PromptReference:
     """
     Identifies a prompt.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     name: str
     """
     Intended for programmatic or logical use, but used as a display name in past specs or fallback (if title isn't present).
@@ -686,31 +618,28 @@ class PromptReference(WireModel):
     type: Literal["ref/prompt"]
 
 
-class Request(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class Request:
     method: str
     params: dict[str, Any] | None = None
 
 
-class RequestId(RootModel[str | int]):
+@dataclass(kw_only=True)
+class RequestId:
     root: str | int
     """
     A uniquely identifying ID for a request in JSON-RPC.
     """
 
 
-class ResourceContents(WireModel):
+@dataclass(kw_only=True)
+class ResourceContents:
     """
     The contents of a specific resource or sub-resource.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+    meta: MetaObject | None = None
+    mime_type: str | None = None
     """
     The MIME type of this resource, if known.
     """
@@ -720,14 +649,12 @@ class ResourceContents(WireModel):
     """
 
 
-class ResourceTemplateReference(WireModel):
+@dataclass(kw_only=True)
+class ResourceTemplateReference:
     """
     A reference to a resource or resource template definition.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     type: Literal["ref/resource"]
     uri: str
     """
@@ -735,15 +662,13 @@ class ResourceTemplateReference(WireModel):
     """
 
 
-class ResultMetaObject(WireModel):
+@dataclass(kw_only=True)
+class ResultMetaObject:
     """
     Extends {@link MetaObject} with additional result-specific fields. All key naming rules from `MetaObject` apply.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    io_modelcontextprotocol_server_info: Annotated[Any | None, Field(alias="io.modelcontextprotocol/serverInfo")] = None
+    io_modelcontextprotocol_server_info: Any | None = None
     """
     Identifies the server software producing the response. Servers SHOULD
     include this field on every response unless specifically configured not
@@ -759,7 +684,8 @@ class ResultMetaObject(WireModel):
     """
 
 
-class ResultType(RootModel[str]):
+@dataclass(kw_only=True)
+class ResultType:
     root: str
     """
     Indicates the type of a {@link Result} object, allowing the client to
@@ -770,22 +696,21 @@ class ResultType(RootModel[str]):
     """
 
 
-class Role(RootModel[Literal["assistant", "user"]]):
+@dataclass(kw_only=True)
+class Role:
     root: Literal["assistant", "user"]
     """
     The sender or recipient of messages and data in a conversation.
     """
 
 
-class Root(WireModel):
+@dataclass(kw_only=True)
+class Root:
     """
     Represents a root directory or file that the server can operate on.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     name: str | None = None
     """
     An optional name for the root. This can be used to provide a human-readable
@@ -800,29 +725,25 @@ class Root(WireModel):
     """
 
 
-class Prompts(WireModel):
+@dataclass(kw_only=True)
+class Prompts:
     """
     Present if the server offers any prompt templates.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    list_changed: Annotated[bool | None, Field(alias="listChanged")] = None
+    list_changed: bool | None = None
     """
     Whether this server supports notifications for changes to the prompt list.
     """
 
 
-class Resources(WireModel):
+@dataclass(kw_only=True)
+class Resources:
     """
     Present if the server offers any resources to read.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    list_changed: Annotated[bool | None, Field(alias="listChanged")] = None
+    list_changed: bool | None = None
     """
     Whether this server supports notifications for changes to the resource list.
     """
@@ -832,34 +753,31 @@ class Resources(WireModel):
     """
 
 
-class Tools(WireModel):
+@dataclass(kw_only=True)
+class Tools:
     """
     Present if the server offers any tools to call.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    list_changed: Annotated[bool | None, Field(alias="listChanged")] = None
+    list_changed: bool | None = None
     """
     Whether this server supports notifications for changes to the tool list.
     """
 
 
-class StringSchema(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class StringSchema:
     default: str | None = None
     description: str | None = None
     format: Literal["date", "date-time", "email", "uri"] | None = None
-    max_length: Annotated[int | None, Field(alias="maxLength")] = None
-    min_length: Annotated[int | None, Field(alias="minLength")] = None
+    max_length: int | None = None
+    min_length: int | None = None
     title: str | None = None
     type: Literal["string"]
 
 
-class SubscriptionFilter(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionFilter:
     """
     The set of notification types a client may opt in to on a
     {@link SubscriptionsListenRequestsubscriptions/listen} request.
@@ -868,38 +786,33 @@ class SubscriptionFilter(WireModel):
     notification types the client has not explicitly requested here.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    prompts_list_changed: Annotated[bool | None, Field(alias="promptsListChanged")] = None
+    prompts_list_changed: bool | None = None
     """
     If true, receive {@link PromptListChangedNotificationnotifications/prompts/list_changed}.
     """
-    resource_subscriptions: Annotated[list[str] | None, Field(alias="resourceSubscriptions")] = None
+    resource_subscriptions: list[str] | None = None
     """
     Subscribe to {@link ResourceUpdatedNotificationnotifications/resources/updated} for these resource URIs.
     Replaces the former `resources/subscribe` RPC.
     """
-    resources_list_changed: Annotated[bool | None, Field(alias="resourcesListChanged")] = None
+    resources_list_changed: bool | None = None
     """
     If true, receive {@link ResourceListChangedNotificationnotifications/resources/list_changed}.
     """
-    tools_list_changed: Annotated[bool | None, Field(alias="toolsListChanged")] = None
+    tools_list_changed: bool | None = None
     """
     If true, receive {@link ToolListChangedNotificationnotifications/tools/list_changed}.
     """
 
 
-class SubscriptionsListenResultMeta(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionsListenResultMeta:
     """
     Extends {@link ResultMetaObject} with the subscription-stream identifier carried by a
     {@link SubscriptionsListenResult}. All key naming rules from `MetaObject` apply.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    io_modelcontextprotocol_server_info: Annotated[Any | None, Field(alias="io.modelcontextprotocol/serverInfo")] = None
+    io_modelcontextprotocol_server_info: Any | None = None
     """
     Identifies the server software producing the response. Servers SHOULD
     include this field on every response unless specifically configured not
@@ -913,7 +826,7 @@ class SubscriptionsListenResultMeta(WireModel):
     SHOULD NOT use it to change their behavior, and SHOULD NOT rely on it for
     security decisions.
     """
-    io_modelcontextprotocol_subscription_id: Annotated[RequestId, Field(alias="io.modelcontextprotocol/subscriptionId")]
+    io_modelcontextprotocol_subscription_id: RequestId
     """
     Identifies the subscription stream this response closes, so the client can
     correlate it with the originating subscription — mirroring the same key on
@@ -923,12 +836,10 @@ class SubscriptionsListenResultMeta(WireModel):
     """
 
 
-class TextResourceContents(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+@dataclass(kw_only=True)
+class TextResourceContents:
+    meta: MetaObject | None = None
+    mime_type: str | None = None
     """
     The MIME type of this resource, if known.
     """
@@ -942,10 +853,8 @@ class TextResourceContents(WireModel):
     """
 
 
-class AnyOfItem(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class AnyOfItem:
     const: str
     """
     The constant enum value.
@@ -956,28 +865,24 @@ class AnyOfItem(WireModel):
     """
 
 
-class Items(WireModel):
+@dataclass(kw_only=True)
+class Items:
     """
     Schema for array items with enum options and display labels.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    any_of: Annotated[list[AnyOfItem], Field(alias="anyOf")]
+    any_of: list[AnyOfItem]
     """
     Array of enum options with values and display labels.
     """
 
 
-class TitledMultiSelectEnumSchema(WireModel):
+@dataclass(kw_only=True)
+class TitledMultiSelectEnumSchema:
     """
     Schema for multiple-selection enumeration with display titles for each option.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     default: list[str] | None = None
     """
     Optional default value.
@@ -990,11 +895,11 @@ class TitledMultiSelectEnumSchema(WireModel):
     """
     Schema for array items with enum options and display labels.
     """
-    max_items: Annotated[int | None, Field(alias="maxItems")] = None
+    max_items: int | None = None
     """
     Maximum number of items to select.
     """
-    min_items: Annotated[int | None, Field(alias="minItems")] = None
+    min_items: int | None = None
     """
     Minimum number of items to select.
     """
@@ -1005,10 +910,8 @@ class TitledMultiSelectEnumSchema(WireModel):
     type: Literal["array"]
 
 
-class OneOfItem(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class OneOfItem:
     const: str
     """
     The enum value.
@@ -1019,14 +922,12 @@ class OneOfItem(WireModel):
     """
 
 
-class TitledSingleSelectEnumSchema(WireModel):
+@dataclass(kw_only=True)
+class TitledSingleSelectEnumSchema:
     """
     Schema for single-selection enumeration with display titles for each option.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     default: str | None = None
     """
     Optional default value.
@@ -1035,7 +936,7 @@ class TitledSingleSelectEnumSchema(WireModel):
     """
     Optional description for the enum field.
     """
-    one_of: Annotated[list[OneOfItem], Field(alias="oneOf")]
+    one_of: list[OneOfItem]
     """
     Array of enum options with values and display labels.
     """
@@ -1046,7 +947,8 @@ class TitledSingleSelectEnumSchema(WireModel):
     type: Literal["string"]
 
 
-class InputSchema(WireModel):
+@dataclass(kw_only=True)
+class InputSchema:
     """
     A JSON Schema object defining the expected parameters for the tool.
 
@@ -1064,14 +966,12 @@ class InputSchema(WireModel):
     Defaults to JSON Schema 2020-12 when no explicit `$schema` is provided.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    schema_: Annotated[str | None, Field(alias="$schema")] = None
+    schema_: str | None = None
     type: Literal["object"]
 
 
-class OutputSchema(WireModel):
+@dataclass(kw_only=True)
+class OutputSchema:
     """
     An optional JSON Schema object defining the structure of the tool's output returned in
     the structuredContent field of a {@link CallToolResult}. This can be any valid JSON Schema 2020-12.
@@ -1079,13 +979,11 @@ class OutputSchema(WireModel):
     Defaults to JSON Schema 2020-12 when no explicit `$schema` is provided.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    schema_: Annotated[str | None, Field(alias="$schema")] = None
+    schema_: str | None = None
 
 
-class ToolAnnotations(WireModel):
+@dataclass(kw_only=True)
+class ToolAnnotations:
     """
     Additional properties describing a {@link Tool} to clients.
 
@@ -1097,10 +995,7 @@ class ToolAnnotations(WireModel):
     received from untrusted servers.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    destructive_hint: Annotated[bool | None, Field(alias="destructiveHint")] = None
+    destructive_hint: bool | None = None
     """
     If true, the tool may perform destructive updates to its environment.
     If false, the tool performs only additive updates.
@@ -1109,7 +1004,7 @@ class ToolAnnotations(WireModel):
 
     Default: true
     """
-    idempotent_hint: Annotated[bool | None, Field(alias="idempotentHint")] = None
+    idempotent_hint: bool | None = None
     """
     If true, calling the tool repeatedly with the same arguments
     will have no additional effect on its environment.
@@ -1118,7 +1013,7 @@ class ToolAnnotations(WireModel):
 
     Default: false
     """
-    open_world_hint: Annotated[bool | None, Field(alias="openWorldHint")] = None
+    open_world_hint: bool | None = None
     """
     If true, this tool may interact with an "open world" of external
     entities. If false, the tool's domain of interaction is closed.
@@ -1127,7 +1022,7 @@ class ToolAnnotations(WireModel):
 
     Default: true
     """
-    read_only_hint: Annotated[bool | None, Field(alias="readOnlyHint")] = None
+    read_only_hint: bool | None = None
     """
     If true, the tool does not modify its environment.
 
@@ -1139,14 +1034,12 @@ class ToolAnnotations(WireModel):
     """
 
 
-class ToolChoice(WireModel):
+@dataclass(kw_only=True)
+class ToolChoice:
     """
     Controls tool selection behavior for sampling requests.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     mode: Literal["auto", "none", "required"] | None = None
     """
     Controls the tool use ability of the model:
@@ -1156,15 +1049,13 @@ class ToolChoice(WireModel):
     """
 
 
-class ToolUseContent(WireModel):
+@dataclass(kw_only=True)
+class ToolUseContent:
     """
     A request from the assistant to call a tool.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     """
     Optional metadata about the tool use. Clients SHOULD preserve this field when
     including tool uses in subsequent sampling requests to enable caching optimizations.
@@ -1186,14 +1077,12 @@ class ToolUseContent(WireModel):
     type: Literal["tool_use"]
 
 
-class Data1(WireModel):
+@dataclass(kw_only=True)
+class Data1:
     """
     Additional information about the error. The value of this member is defined by the sender (e.g. detailed error information, nested errors etc.).
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     requested: str
     """
     The protocol version that was requested by the client.
@@ -1205,10 +1094,8 @@ class Data1(WireModel):
     """
 
 
+@dataclass(kw_only=True)
 class Error3(Error):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32022]
     """
     The error type that occurred.
@@ -1219,7 +1106,8 @@ class Error3(Error):
     """
 
 
-class UnsupportedProtocolVersionError(WireModel):
+@dataclass(kw_only=True)
+class UnsupportedProtocolVersionError:
     """
     Returned when the request's protocol version is unknown to the server or
     unsupported (e.g., a known experimental or draft version the server has
@@ -1227,22 +1115,17 @@ class UnsupportedProtocolVersionError(WireModel):
     `400 Bad Request`.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     error: Error3
     id: RequestId | None = None
     jsonrpc: Literal["2.0"]
 
 
-class Items1(WireModel):
+@dataclass(kw_only=True)
+class Items1:
     """
     Schema for the array items.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     enum: list[str]
     """
     Array of enum values to choose from.
@@ -1250,14 +1133,12 @@ class Items1(WireModel):
     type: Literal["string"]
 
 
-class UntitledMultiSelectEnumSchema(WireModel):
+@dataclass(kw_only=True)
+class UntitledMultiSelectEnumSchema:
     """
     Schema for multiple-selection enumeration without display titles for options.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     default: list[str] | None = None
     """
     Optional default value.
@@ -1270,11 +1151,11 @@ class UntitledMultiSelectEnumSchema(WireModel):
     """
     Schema for the array items.
     """
-    max_items: Annotated[int | None, Field(alias="maxItems")] = None
+    max_items: int | None = None
     """
     Maximum number of items to select.
     """
-    min_items: Annotated[int | None, Field(alias="minItems")] = None
+    min_items: int | None = None
     """
     Minimum number of items to select.
     """
@@ -1285,14 +1166,12 @@ class UntitledMultiSelectEnumSchema(WireModel):
     type: Literal["array"]
 
 
-class UntitledSingleSelectEnumSchema(WireModel):
+@dataclass(kw_only=True)
+class UntitledSingleSelectEnumSchema:
     """
     Schema for single-selection enumeration without display titles for options.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     default: str | None = None
     """
     Optional default value.
@@ -1312,21 +1191,19 @@ class UntitledSingleSelectEnumSchema(WireModel):
     type: Literal["string"]
 
 
-class Annotations(WireModel):
+@dataclass(kw_only=True)
+class Annotations:
     """
     Optional annotations for the client. The client can use annotations to inform how objects are used or displayed
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     audience: list[Role] | None = None
     """
     Describes who the intended audience of this object or data is.
 
     It can include multiple entries to indicate content useful for multiple audiences (e.g., `["user", "assistant"]`).
     """
-    last_modified: Annotated[str | None, Field(alias="lastModified")] = None
+    last_modified: str | None = None
     """
     The moment the resource was last modified, as an ISO 8601 formatted string.
 
@@ -1335,7 +1212,7 @@ class Annotations(WireModel):
     Examples: last activity timestamp in an open file, timestamp when the resource
     was attached, etc.
     """
-    priority: Annotated[float | None, Field(ge=0.0, le=1.0)] = None
+    priority: float | None = None
     """
     Describes how important this data is for operating the server.
 
@@ -1345,15 +1222,13 @@ class Annotations(WireModel):
     """
 
 
-class AudioContent(WireModel):
+@dataclass(kw_only=True)
+class AudioContent:
     """
     Audio provided to or from an LLM.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -1362,23 +1237,21 @@ class AudioContent(WireModel):
     """
     The base64-encoded audio data.
     """
-    mime_type: Annotated[str, Field(alias="mimeType")]
+    mime_type: str
     """
     The MIME type of the audio. Different providers may support different audio types.
     """
     type: Literal["audio"]
 
 
-class BlobResourceContents(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+@dataclass(kw_only=True)
+class BlobResourceContents:
+    meta: MetaObject | None = None
     blob: str
     """
     A base64-encoded string representing the binary data of the item.
     """
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+    mime_type: str | None = None
     """
     The MIME type of this resource, if known.
     """
@@ -1388,16 +1261,14 @@ class BlobResourceContents(WireModel):
     """
 
 
-class CacheableResult(WireModel):
+@dataclass(kw_only=True)
+class CacheableResult:
     """
     A result that supports a time-to-live (TTL) hint for client-side caching.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -1410,7 +1281,7 @@ class CacheableResult(WireModel):
       authorization contexts (e.g., a different access token requires a
       different cache).
     """
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -1420,7 +1291,7 @@ class CacheableResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -1433,17 +1304,15 @@ class CacheableResult(WireModel):
     """
 
 
-class CompleteResult(WireModel):
+@dataclass(kw_only=True)
+class CompleteResult:
     """
     The result returned by the server for a {@link CompleteRequestcompletion/complete} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
+    meta: ResultMetaObject | None = None
     completion: Completion
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -1455,27 +1324,27 @@ class CompleteResult(WireModel):
     """
 
 
-class CompleteResultResponse(WireModel):
+@dataclass(kw_only=True)
+class CompleteResultResponse:
     """
     A successful response from the server for a {@link CompleteRequestcompletion/complete} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: CompleteResult
 
 
-class ElicitRequestParams(RootModel[ElicitRequestFormParams | ElicitRequestURLParams]):
+@dataclass(kw_only=True)
+class ElicitRequestParams:
     root: ElicitRequestFormParams | ElicitRequestURLParams
     """
     The parameters for a request to elicit additional information from the user via the client.
     """
 
 
-class EmbeddedResource(WireModel):
+@dataclass(kw_only=True)
+class EmbeddedResource:
     """
     The contents of a resource, embedded into a prompt or tool call result.
 
@@ -1483,10 +1352,7 @@ class EmbeddedResource(WireModel):
     of the LLM and/or the user.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -1495,15 +1361,8 @@ class EmbeddedResource(WireModel):
     type: Literal["resource"]
 
 
-class EnumSchema(
-    RootModel[
-        UntitledSingleSelectEnumSchema
-        | TitledSingleSelectEnumSchema
-        | UntitledMultiSelectEnumSchema
-        | TitledMultiSelectEnumSchema
-        | LegacyTitledEnumSchema
-    ]
-):
+@dataclass(kw_only=True)
+class EnumSchema:
     root: (
         UntitledSingleSelectEnumSchema
         | TitledSingleSelectEnumSchema
@@ -1513,7 +1372,8 @@ class EnumSchema(
     )
 
 
-class HeaderMismatchError(WireModel):
+@dataclass(kw_only=True)
+class HeaderMismatchError:
     """
     Returned when a server rejects a request because the values in the HTTP
     headers do not match the corresponding values in the request body, or
@@ -1521,23 +1381,18 @@ class HeaderMismatchError(WireModel):
     status code MUST be `400 Bad Request`.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     error: Error1
     id: RequestId | None = None
     jsonrpc: Literal["2.0"]
 
 
-class ImageContent(WireModel):
+@dataclass(kw_only=True)
+class ImageContent:
     """
     An image provided to or from an LLM.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -1546,48 +1401,43 @@ class ImageContent(WireModel):
     """
     The base64-encoded image data.
     """
-    mime_type: Annotated[str, Field(alias="mimeType")]
+    mime_type: str
     """
     The MIME type of the image. Different providers may support different image types.
     """
     type: Literal["image"]
 
 
-class JSONRPCErrorResponse(WireModel):
+@dataclass(kw_only=True)
+class JSONRPCErrorResponse:
     """
     A response to a request that indicates an error occurred.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     error: Error
     id: RequestId | None = None
     jsonrpc: Literal["2.0"]
 
 
-class JSONRPCRequest(WireModel):
+@dataclass(kw_only=True)
+class JSONRPCRequest:
     """
     A request that expects a response.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: str
     params: dict[str, Any] | None = None
 
 
-class Params(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+@dataclass(kw_only=True)
+class Params:
+    meta: MetaObject | None = None
 
 
-class ListRootsRequest(WireModel):
+@dataclass(kw_only=True)
+class ListRootsRequest:
     """
     Sent from the server to request a list of root URIs from the client. Roots allow
     servers to ask for specific directories or files to operate on. A common example
@@ -1598,41 +1448,33 @@ class ListRootsRequest(WireModel):
     structure or access specific locations that the client has permission to read from.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     method: Literal["roots/list"]
     params: Params | None = None
 
 
-class ListRootsResult(WireModel):
+@dataclass(kw_only=True)
+class ListRootsResult:
     """
     The result returned by the client for a {@link ListRootsRequestroots/list} request.
     This result contains an array of {@link Root} objects, each representing a root directory
     or file that the server can operate on.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     roots: list[Root]
 
 
-class MultiSelectEnumSchema(RootModel[UntitledMultiSelectEnumSchema | TitledMultiSelectEnumSchema]):
+@dataclass(kw_only=True)
+class MultiSelectEnumSchema:
     root: UntitledMultiSelectEnumSchema | TitledMultiSelectEnumSchema
 
 
-class NotificationMetaObject(WireModel):
+@dataclass(kw_only=True)
+class NotificationMetaObject:
     """
     Extends {@link MetaObject} with additional notification-specific fields. All key naming rules from `MetaObject` apply.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    io_modelcontextprotocol_subscription_id: Annotated[
-        RequestId | None, Field(alias="io.modelcontextprotocol/subscriptionId")
-    ] = None
+    io_modelcontextprotocol_subscription_id: RequestId | None = None
     """
     Identifies the subscription stream a notification was delivered on. The
     server MUST include this key on every notification delivered via a
@@ -1647,28 +1489,24 @@ class NotificationMetaObject(WireModel):
     """
 
 
-class NotificationParams(WireModel):
+@dataclass(kw_only=True)
+class NotificationParams:
     """
     Common params for any notification.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[NotificationMetaObject | None, Field(alias="_meta")] = None
+    meta: NotificationMetaObject | None = None
 
 
-class PaginatedResult(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    next_cursor: Annotated[str | None, Field(alias="nextCursor")] = None
+@dataclass(kw_only=True)
+class PaginatedResult:
+    meta: ResultMetaObject | None = None
+    next_cursor: str | None = None
     """
     An opaque token representing the pagination position after the last returned result.
     If present, there may be more results available.
     """
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -1680,18 +1518,8 @@ class PaginatedResult(WireModel):
     """
 
 
-class PrimitiveSchemaDefinition(
-    RootModel[
-        StringSchema
-        | NumberSchema
-        | BooleanSchema
-        | UntitledSingleSelectEnumSchema
-        | TitledSingleSelectEnumSchema
-        | UntitledMultiSelectEnumSchema
-        | TitledMultiSelectEnumSchema
-        | LegacyTitledEnumSchema
-    ]
-):
+@dataclass(kw_only=True)
+class PrimitiveSchemaDefinition:
     root: (
         StringSchema
         | NumberSchema
@@ -1708,15 +1536,13 @@ class PrimitiveSchemaDefinition(
     """
 
 
-class ProgressNotificationParams(WireModel):
+@dataclass(kw_only=True)
+class ProgressNotificationParams:
     """
     Parameters for a {@link ProgressNotificationnotifications/progress} notification.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[NotificationMetaObject | None, Field(alias="_meta")] = None
+    meta: NotificationMetaObject | None = None
     message: str | None = None
     """
     An optional message describing the current progress.
@@ -1725,7 +1551,7 @@ class ProgressNotificationParams(WireModel):
     """
     The progress thus far. This should increase every time progress is made, even if the total is unknown.
     """
-    progress_token: Annotated[ProgressToken, Field(alias="progressToken")]
+    progress_token: ProgressToken
     """
     The progress token which was given in the initial request, used to associate this notification with the request that is proceeding.
     """
@@ -1735,15 +1561,13 @@ class ProgressNotificationParams(WireModel):
     """
 
 
-class Prompt(WireModel):
+@dataclass(kw_only=True)
+class Prompt:
     """
     A prompt or prompt template that the server offers.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     arguments: list[PromptArgument] | None = None
     """
     A list of arguments to use for templating the prompt.
@@ -1779,29 +1603,25 @@ class Prompt(WireModel):
     """
 
 
-class PromptListChangedNotification(WireModel):
+@dataclass(kw_only=True)
+class PromptListChangedNotification:
     """
     An optional notification from the server to the client, informing it that the list of prompts it offers has changed. This is only delivered on a {@link SubscriptionsListenRequestsubscriptions/listen} stream when the client requested it via the `promptsListChanged` filter field.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/prompts/list_changed"]
     params: NotificationParams | None = None
 
 
-class ReadResourceResult(WireModel):
+@dataclass(kw_only=True)
+class ReadResourceResult:
     """
     The result returned by the server for a {@link ReadResourceRequestresources/read} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -1815,7 +1635,7 @@ class ReadResourceResult(WireModel):
       different cache).
     """
     contents: list[TextResourceContents | BlobResourceContents]
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -1825,7 +1645,7 @@ class ReadResourceResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -1838,15 +1658,13 @@ class ReadResourceResult(WireModel):
     """
 
 
-class Resource(WireModel):
+@dataclass(kw_only=True)
+class Resource:
     """
     A known resource that the server is capable of reading.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -1869,7 +1687,7 @@ class Resource(WireModel):
     - `image/svg+xml` - SVG images (scalable but requires security precautions)
     - `image/webp` - WebP images (modern, efficient format)
     """
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+    mime_type: str | None = None
     """
     The MIME type of this resource, if known.
     """
@@ -1898,17 +1716,15 @@ class Resource(WireModel):
     """
 
 
-class ResourceLink(WireModel):
+@dataclass(kw_only=True)
+class ResourceLink:
     """
     A resource that the server is capable of reading, included in a prompt or tool call result.
 
     Note: resource links returned by tools are not guaranteed to appear in the results of {@link ListResourcesRequestresources/list} requests.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -1931,7 +1747,7 @@ class ResourceLink(WireModel):
     - `image/svg+xml` - SVG images (scalable but requires security precautions)
     - `image/webp` - WebP images (modern, efficient format)
     """
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+    mime_type: str | None = None
     """
     The MIME type of this resource, if known.
     """
@@ -1961,28 +1777,24 @@ class ResourceLink(WireModel):
     """
 
 
-class ResourceListChangedNotification(WireModel):
+@dataclass(kw_only=True)
+class ResourceListChangedNotification:
     """
     An optional notification from the server to the client, informing it that the list of resources it can read from has changed. This is only delivered on a {@link SubscriptionsListenRequestsubscriptions/listen} stream when the client requested it via the `resourcesListChanged` filter field.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/resources/list_changed"]
     params: NotificationParams | None = None
 
 
-class ResourceTemplate(WireModel):
+@dataclass(kw_only=True)
+class ResourceTemplate:
     """
     A template description for resources available on the server.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -2005,7 +1817,7 @@ class ResourceTemplate(WireModel):
     - `image/svg+xml` - SVG images (scalable but requires security precautions)
     - `image/webp` - WebP images (modern, efficient format)
     """
-    mime_type: Annotated[str | None, Field(alias="mimeType")] = None
+    mime_type: str | None = None
     """
     The MIME type for all resources that match this template. This should only be included if all resources matching this template have the same type.
     """
@@ -2022,37 +1834,33 @@ class ResourceTemplate(WireModel):
     where `annotations.title` should be given precedence over using `name`,
     if present).
     """
-    uri_template: Annotated[str, Field(alias="uriTemplate")]
+    uri_template: str
     """
     A URI template (according to RFC 6570) that can be used to construct resource URIs.
     """
 
 
-class ResourceUpdatedNotificationParams(WireModel):
+@dataclass(kw_only=True)
+class ResourceUpdatedNotificationParams:
     """
     Parameters for a `notifications/resources/updated` notification.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[NotificationMetaObject | None, Field(alias="_meta")] = None
+    meta: NotificationMetaObject | None = None
     uri: str
     """
     The URI of the resource that has been updated. This might be a sub-resource of the one that the client actually subscribed to.
     """
 
 
-class Result(WireModel):
+@dataclass(kw_only=True)
+class Result:
     """
     Common result fields.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    result_type: Annotated[str, Field(alias="resultType")]
+    meta: ResultMetaObject | None = None
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2064,19 +1872,18 @@ class Result(WireModel):
     """
 
 
-class SingleSelectEnumSchema(RootModel[UntitledSingleSelectEnumSchema | TitledSingleSelectEnumSchema]):
+@dataclass(kw_only=True)
+class SingleSelectEnumSchema:
     root: UntitledSingleSelectEnumSchema | TitledSingleSelectEnumSchema
 
 
-class SubscriptionsAcknowledgedNotificationParams(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionsAcknowledgedNotificationParams:
     """
     Parameters for a {@link SubscriptionsAcknowledgedNotificationnotifications/subscriptions/acknowledged} notification.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[NotificationMetaObject | None, Field(alias="_meta")] = None
+    meta: NotificationMetaObject | None = None
     notifications: SubscriptionFilter
     """
     The subset of requested notification types the server agreed to honor.
@@ -2086,7 +1893,8 @@ class SubscriptionsAcknowledgedNotificationParams(WireModel):
     """
 
 
-class SubscriptionsListenResult(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionsListenResult:
     """
     The response to a {@link SubscriptionsListenRequestsubscriptions/listen}
     request, signalling that the subscription has ended gracefully (for example,
@@ -2095,11 +1903,8 @@ class SubscriptionsListenResult(WireModel):
     close carries no response. The result body is otherwise empty.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[SubscriptionsListenResultMeta, Field(alias="_meta")]
-    result_type: Annotated[str, Field(alias="resultType")]
+    meta: SubscriptionsListenResultMeta
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2111,15 +1916,13 @@ class SubscriptionsListenResult(WireModel):
     """
 
 
-class TextContent(WireModel):
+@dataclass(kw_only=True)
+class TextContent:
     """
     Text provided to or from an LLM.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: Annotations | None = None
     """
     Optional annotations for the client.
@@ -2131,15 +1934,13 @@ class TextContent(WireModel):
     type: Literal["text"]
 
 
-class Tool(WireModel):
+@dataclass(kw_only=True)
+class Tool:
     """
     Definition for a tool the client can call.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     annotations: ToolAnnotations | None = None
     """
     Optional additional tool information.
@@ -2164,7 +1965,7 @@ class Tool(WireModel):
     - `image/svg+xml` - SVG images (scalable but requires security precautions)
     - `image/webp` - WebP images (modern, efficient format)
     """
-    input_schema: Annotated[InputSchema, Field(alias="inputSchema")]
+    input_schema: InputSchema
     """
     A JSON Schema object defining the expected parameters for the tool.
 
@@ -2185,7 +1986,7 @@ class Tool(WireModel):
     """
     Intended for programmatic or logical use, but used as a display name in past specs or fallback (if title isn't present).
     """
-    output_schema: Annotated[OutputSchema | None, Field(alias="outputSchema")] = None
+    output_schema: OutputSchema | None = None
     """
     An optional JSON Schema object defining the structure of the tool's output returned in
     the structuredContent field of a {@link CallToolResult}. This can be any valid JSON Schema 2020-12.
@@ -2203,33 +2004,29 @@ class Tool(WireModel):
     """
 
 
-class ToolListChangedNotification(WireModel):
+@dataclass(kw_only=True)
+class ToolListChangedNotification:
     """
     An optional notification from the server to the client, informing it that the list of tools it offers has changed. This is only delivered on a {@link SubscriptionsListenRequestsubscriptions/listen} stream when the client requested it via the `toolsListChanged` filter field.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/tools/list_changed"]
     params: NotificationParams | None = None
 
 
-class CancelledNotificationParams(WireModel):
+@dataclass(kw_only=True)
+class CancelledNotificationParams:
     """
     Parameters for a `notifications/cancelled` notification.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[NotificationMetaObject | None, Field(alias="_meta")] = None
+    meta: NotificationMetaObject | None = None
     reason: str | None = None
     """
     An optional string describing the reason for the cancellation. This MAY be logged or presented to the user.
     """
-    request_id: Annotated[RequestId, Field(alias="requestId")]
+    request_id: RequestId
     """
     The ID of the request to cancel.
 
@@ -2237,7 +2034,8 @@ class CancelledNotificationParams(WireModel):
     """
 
 
-class ClientNotification(WireModel):
+@dataclass(kw_only=True)
+class ClientNotification:
     """
     This notification is sent by the client to indicate that it is cancelling a request it previously issued.
 
@@ -2248,67 +2046,61 @@ class ClientNotification(WireModel):
     This notification indicates that the result will be unused, so any associated processing SHOULD cease.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/cancelled"]
     params: CancelledNotificationParams
 
 
-class ClientResult(RootModel[Result]):
+@dataclass(kw_only=True)
+class ClientResult:
     root: Result
     """
     Common result fields.
     """
 
 
-class ContentBlock(RootModel[TextContent | ImageContent | AudioContent | ResourceLink | EmbeddedResource]):
+@dataclass(kw_only=True)
+class ContentBlock:
     root: TextContent | ImageContent | AudioContent | ResourceLink | EmbeddedResource
 
 
-class ElicitRequest(WireModel):
+@dataclass(kw_only=True)
+class ElicitRequest:
     """
     A request from the server to elicit additional information from the user via the client.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     method: Literal["elicitation/create"]
     params: ElicitRequestParams
 
 
-class EmptyResult(RootModel[Result]):
+@dataclass(kw_only=True)
+class EmptyResult:
     root: Result
     """
     Common result fields.
     """
 
 
-class JSONRPCResultResponse(WireModel):
+@dataclass(kw_only=True)
+class JSONRPCResultResponse:
     """
     A successful (non-error) response to a request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: Result
 
 
-class ListPromptsResult(WireModel):
+@dataclass(kw_only=True)
+class ListPromptsResult:
     """
     The result returned by the server for a {@link ListPromptsRequestprompts/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -2321,13 +2113,13 @@ class ListPromptsResult(WireModel):
       authorization contexts (e.g., a different access token requires a
       different cache).
     """
-    next_cursor: Annotated[str | None, Field(alias="nextCursor")] = None
+    next_cursor: str | None = None
     """
     An opaque token representing the pagination position after the last returned result.
     If present, there may be more results available.
     """
     prompts: list[Prompt]
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2337,7 +2129,7 @@ class ListPromptsResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -2350,29 +2142,25 @@ class ListPromptsResult(WireModel):
     """
 
 
-class ListPromptsResultResponse(WireModel):
+@dataclass(kw_only=True)
+class ListPromptsResultResponse:
     """
     A successful response from the server for a {@link ListPromptsRequestprompts/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: ListPromptsResult
 
 
-class ListResourceTemplatesResult(WireModel):
+@dataclass(kw_only=True)
+class ListResourceTemplatesResult:
     """
     The result returned by the server for a {@link ListResourceTemplatesRequestresources/templates/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -2385,13 +2173,13 @@ class ListResourceTemplatesResult(WireModel):
       authorization contexts (e.g., a different access token requires a
       different cache).
     """
-    next_cursor: Annotated[str | None, Field(alias="nextCursor")] = None
+    next_cursor: str | None = None
     """
     An opaque token representing the pagination position after the last returned result.
     If present, there may be more results available.
     """
-    resource_templates: Annotated[list[ResourceTemplate], Field(alias="resourceTemplates")]
-    result_type: Annotated[str, Field(alias="resultType")]
+    resource_templates: list[ResourceTemplate]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2401,7 +2189,7 @@ class ListResourceTemplatesResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -2414,29 +2202,25 @@ class ListResourceTemplatesResult(WireModel):
     """
 
 
-class ListResourceTemplatesResultResponse(WireModel):
+@dataclass(kw_only=True)
+class ListResourceTemplatesResultResponse:
     """
     A successful response from the server for a {@link ListResourceTemplatesRequestresources/templates/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: ListResourceTemplatesResult
 
 
-class ListResourcesResult(WireModel):
+@dataclass(kw_only=True)
+class ListResourcesResult:
     """
     The result returned by the server for a {@link ListResourcesRequestresources/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -2449,13 +2233,13 @@ class ListResourcesResult(WireModel):
       authorization contexts (e.g., a different access token requires a
       different cache).
     """
-    next_cursor: Annotated[str | None, Field(alias="nextCursor")] = None
+    next_cursor: str | None = None
     """
     An opaque token representing the pagination position after the last returned result.
     If present, there may be more results available.
     """
     resources: list[Resource]
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2465,7 +2249,7 @@ class ListResourcesResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -2478,29 +2262,25 @@ class ListResourcesResult(WireModel):
     """
 
 
-class ListResourcesResultResponse(WireModel):
+@dataclass(kw_only=True)
+class ListResourcesResultResponse:
     """
     A successful response from the server for a {@link ListResourcesRequestresources/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: ListResourcesResult
 
 
-class ListToolsResult(WireModel):
+@dataclass(kw_only=True)
+class ListToolsResult:
     """
     The result returned by the server for a {@link ListToolsRequesttools/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -2513,12 +2293,12 @@ class ListToolsResult(WireModel):
       authorization contexts (e.g., a different access token requires a
       different cache).
     """
-    next_cursor: Annotated[str | None, Field(alias="nextCursor")] = None
+    next_cursor: str | None = None
     """
     An opaque token representing the pagination position after the last returned result.
     If present, there may be more results available.
     """
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2529,7 +2309,7 @@ class ListToolsResult(WireModel):
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
     tools: list[Tool]
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -2542,28 +2322,24 @@ class ListToolsResult(WireModel):
     """
 
 
-class ListToolsResultResponse(WireModel):
+@dataclass(kw_only=True)
+class ListToolsResultResponse:
     """
     A successful response from the server for a {@link ListToolsRequesttools/list} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: ListToolsResult
 
 
-class LoggingMessageNotificationParams(WireModel):
+@dataclass(kw_only=True)
+class LoggingMessageNotificationParams:
     """
     Parameters for a `notifications/message` notification.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[NotificationMetaObject | None, Field(alias="_meta")] = None
+    meta: NotificationMetaObject | None = None
     data: Any
     """
     The data to be logged, such as a string message or an object. Any JSON serializable type is allowed here.
@@ -2578,20 +2354,19 @@ class LoggingMessageNotificationParams(WireModel):
     """
 
 
-class ProgressNotification(WireModel):
+@dataclass(kw_only=True)
+class ProgressNotification:
     """
     An out-of-band notification used to inform the receiver of a progress update for a long-running request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/progress"]
     params: ProgressNotificationParams
 
 
-class PromptMessage(WireModel):
+@dataclass(kw_only=True)
+class PromptMessage:
     """
     Describes a message returned as part of a prompt.
 
@@ -2599,27 +2374,23 @@ class PromptMessage(WireModel):
     resources from the MCP server.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     content: ContentBlock
     role: Role
 
 
-class ResourceUpdatedNotification(WireModel):
+@dataclass(kw_only=True)
+class ResourceUpdatedNotification:
     """
     A notification from the server to the client, informing it that a resource has changed and may need to be read again. This is only sent for resources the client opted in to via the `resourceSubscriptions` field of a {@link SubscriptionsListenRequestsubscriptions/listen} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/resources/updated"]
     params: ResourceUpdatedNotificationParams
 
 
-class SubscriptionsAcknowledgedNotification(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionsAcknowledgedNotification:
     """
     Sent by the server to acknowledge that a
     {@link SubscriptionsListenRequestsubscriptions/listen} subscription has been
@@ -2633,23 +2404,18 @@ class SubscriptionsAcknowledgedNotification(WireModel):
     subscriptions MAY be interleaved before it.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/subscriptions/acknowledged"]
     params: SubscriptionsAcknowledgedNotificationParams
 
 
-class ToolResultContent(WireModel):
+@dataclass(kw_only=True)
+class ToolResultContent:
     """
     The result of a tool use, provided by the user back to the assistant.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     """
     Optional metadata about the tool result. Clients SHOULD preserve this field when
     including tool results in subsequent sampling requests to enable caching optimizations.
@@ -2661,21 +2427,21 @@ class ToolResultContent(WireModel):
     This has the same format as {@link CallToolResult.content} and can include text, images,
     audio, resource links, and embedded resources.
     """
-    is_error: Annotated[bool | None, Field(alias="isError")] = None
+    is_error: bool | None = None
     """
     Whether the tool use resulted in an error.
 
     If true, the content typically describes the error that occurred.
     Default: false
     """
-    structured_content: Annotated[Any | None, Field(alias="structuredContent")] = None
+    structured_content: Any | None = None
     """
     An optional structured result value.
 
     This can be any JSON value (object, array, string, number, boolean, or null).
     If the tool defined an {@link Tool.outputSchema}, this SHOULD conform to that schema.
     """
-    tool_use_id: Annotated[str, Field(alias="toolUseId")]
+    tool_use_id: str
     """
     The ID of the tool use this result corresponds to.
 
@@ -2684,20 +2450,18 @@ class ToolResultContent(WireModel):
     type: Literal["tool_result"]
 
 
-class CallToolResult(WireModel):
+@dataclass(kw_only=True)
+class CallToolResult:
     """
     The result returned by the server for a {@link CallToolRequesttools/call} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
+    meta: ResultMetaObject | None = None
     content: list[ContentBlock]
     """
     A list of content objects that represent the unstructured result of the tool call.
     """
-    is_error: Annotated[bool | None, Field(alias="isError")] = None
+    is_error: bool | None = None
     """
     Whether the tool call ended in an error.
 
@@ -2712,7 +2476,7 @@ class CallToolResult(WireModel):
     server does not support tool calls, or any other exceptional conditions,
     should be reported as an MCP error response.
     """
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2722,7 +2486,7 @@ class CallToolResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    structured_content: Annotated[Any | None, Field(alias="structuredContent")] = None
+    structured_content: Any | None = None
     """
     An optional JSON value that represents the structured result of the tool call.
 
@@ -2731,7 +2495,8 @@ class CallToolResult(WireModel):
     """
 
 
-class CancelledNotification(WireModel):
+@dataclass(kw_only=True)
+class CancelledNotification:
     """
     This notification is sent by the client to indicate that it is cancelling a request it previously issued.
 
@@ -2742,29 +2507,24 @@ class CancelledNotification(WireModel):
     This notification indicates that the result will be unused, so any associated processing SHOULD cease.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/cancelled"]
     params: CancelledNotificationParams
 
 
-class GetPromptResult(WireModel):
+@dataclass(kw_only=True)
+class GetPromptResult:
     """
     The result returned by the server for a {@link GetPromptRequestprompts/get} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
+    meta: ResultMetaObject | None = None
     description: str | None = None
     """
     An optional description for the prompt.
     """
     messages: list[PromptMessage]
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -2776,51 +2536,40 @@ class GetPromptResult(WireModel):
     """
 
 
-class JSONRPCMessage(RootModel[JSONRPCRequest | JSONRPCNotification | JSONRPCResultResponse | JSONRPCErrorResponse]):
+@dataclass(kw_only=True)
+class JSONRPCMessage:
     root: JSONRPCRequest | JSONRPCNotification | JSONRPCResultResponse | JSONRPCErrorResponse
     """
     Refers to any valid JSON-RPC object that can be decoded off the wire, or encoded to be sent.
     """
 
 
-class JSONRPCResponse(RootModel[JSONRPCResultResponse | JSONRPCErrorResponse]):
+@dataclass(kw_only=True)
+class JSONRPCResponse:
     root: JSONRPCResultResponse | JSONRPCErrorResponse
     """
     A response to a request, containing either the result or error.
     """
 
 
-class LoggingMessageNotification(WireModel):
+@dataclass(kw_only=True)
+class LoggingMessageNotification:
     """
     JSONRPCNotification of a log message passed from server to client. The client opts in by setting `"io.modelcontextprotocol/logLevel"` in a request's `_meta`.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     jsonrpc: Literal["2.0"]
     method: Literal["notifications/message"]
     params: LoggingMessageNotificationParams
 
 
-class SamplingMessageContentBlock(
-    RootModel[TextContent | ImageContent | AudioContent | ToolUseContent | ToolResultContent]
-):
+@dataclass(kw_only=True)
+class SamplingMessageContentBlock:
     root: TextContent | ImageContent | AudioContent | ToolUseContent | ToolResultContent
 
 
-class ServerNotification(
-    RootModel[
-        CancelledNotification
-        | ProgressNotification
-        | ResourceListChangedNotification
-        | SubscriptionsAcknowledgedNotification
-        | ResourceUpdatedNotification
-        | PromptListChangedNotification
-        | ToolListChangedNotification
-        | LoggingMessageNotification
-    ]
-):
+@dataclass(kw_only=True)
+class ServerNotification:
     root: (
         CancelledNotification
         | ProgressNotification
@@ -2833,17 +2582,15 @@ class ServerNotification(
     )
 
 
-class CreateMessageResult(WireModel):
+@dataclass(kw_only=True)
+class CreateMessageResult:
     """
     The result returned by the client for a {@link CreateMessageRequestsampling/createMessage} request.
     The client should inform the user before returning the sampled message, to allow them
     to inspect the response (human in the loop) and decide whether to allow the server to see it.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     content: (
         TextContent
         | ImageContent
@@ -2857,7 +2604,7 @@ class CreateMessageResult(WireModel):
     The name of the model that generated the message.
     """
     role: Role
-    stop_reason: Annotated[str | None, Field(alias="stopReason")] = None
+    stop_reason: str | None = None
     """
     The reason why sampling stopped, if known.
 
@@ -2871,11 +2618,13 @@ class CreateMessageResult(WireModel):
     """
 
 
-class InputResponse(RootModel[CreateMessageResult | ListRootsResult | ElicitResult]):
+@dataclass(kw_only=True)
+class InputResponse:
     root: CreateMessageResult | ListRootsResult | ElicitResult
 
 
-class InputResponses(RootModel[dict[str, InputResponse]]):
+@dataclass(kw_only=True)
+class InputResponses:
     """
     A map of client responses to server-initiated requests.
     Keys correspond to the keys in the {@link InputRequests} map;
@@ -2885,15 +2634,13 @@ class InputResponses(RootModel[dict[str, InputResponse]]):
     root: dict[str, InputResponse]
 
 
-class SamplingMessage(WireModel):
+@dataclass(kw_only=True)
+class SamplingMessage:
     """
     Describes a message issued to or received from an LLM API.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[MetaObject | None, Field(alias="_meta")] = None
+    meta: MetaObject | None = None
     content: (
         TextContent
         | ImageContent
@@ -2905,74 +2652,64 @@ class SamplingMessage(WireModel):
     role: Role
 
 
-class CallToolRequest(WireModel):
+@dataclass(kw_only=True)
+class CallToolRequest:
     """
     Used by the client to invoke a tool provided by the server.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["tools/call"]
     params: CallToolRequestParams
 
 
-class CallToolRequestParams(WireModel):
+@dataclass(kw_only=True)
+class CallToolRequestParams:
     """
     Parameters for a `tools/call` request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
     arguments: dict[str, Any] | None = None
     """
     Arguments to use for the tool call.
     """
-    input_responses: Annotated[InputResponses | None, Field(alias="inputResponses")] = None
+    input_responses: InputResponses | None = None
     name: str
     """
     The name of the tool.
     """
-    request_state: Annotated[str | None, Field(alias="requestState")] = None
+    request_state: str | None = None
 
 
-class CallToolResultResponse(WireModel):
+@dataclass(kw_only=True)
+class CallToolResultResponse:
     """
     A successful response from the server for a {@link CallToolRequesttools/call} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: InputRequiredResult | CallToolResult
 
 
-class Elicitation(WireModel):
+@dataclass(kw_only=True)
+class Elicitation:
     """
     Present if the client supports elicitation from the server.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     form: JSONObject | None = None
     url: JSONObject | None = None
 
 
-class Sampling(WireModel):
+@dataclass(kw_only=True)
+class Sampling:
     """
     Present if the client supports sampling from an LLM.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     context: JSONObject | None = None
     """
     Whether the client supports context inclusion via `includeContext` parameter.
@@ -2984,14 +2721,12 @@ class Sampling(WireModel):
     """
 
 
-class ClientCapabilities(WireModel):
+@dataclass(kw_only=True)
+class ClientCapabilities:
     """
     Capabilities a client may support. Known capabilities are defined here, in this schema, but this is not a closed set: any client can define its own, additional capabilities.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     elicitation: Elicitation | None = None
     """
     Present if the client supports elicitation from the server.
@@ -3019,29 +2754,25 @@ class ClientCapabilities(WireModel):
     """
 
 
-class CompleteRequest(WireModel):
+@dataclass(kw_only=True)
+class CompleteRequest:
     """
     A request from the client to the server, to ask for completion options.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["completion/complete"]
     params: CompleteRequestParams
 
 
-class CompleteRequestParams(WireModel):
+@dataclass(kw_only=True)
+class CompleteRequestParams:
     """
     Parameters for a `completion/complete` request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
     argument: Argument
     """
     The argument's information
@@ -3053,30 +2784,23 @@ class CompleteRequestParams(WireModel):
     ref: PromptReference | ResourceTemplateReference
 
 
-class CreateMessageRequest(WireModel):
+@dataclass(kw_only=True)
+class CreateMessageRequest:
     """
     A request from the server to sample an LLM via the client. The client has full discretion over which model to select. The client should also inform the user before beginning sampling, to allow them to inspect the request (human in the loop) and decide whether to approve it.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     method: Literal["sampling/createMessage"]
     params: CreateMessageRequestParams
 
 
-class CreateMessageRequestParams(WireModel):
+@dataclass(kw_only=True)
+class CreateMessageRequestParams:
     """
     Parameters for a `sampling/createMessage` request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    include_context: Annotated[
-        Literal["allServers", "none", "thisServer"] | None,
-        Field(alias="includeContext"),
-    ] = None
+    include_context: Literal["allServers", "none", "thisServer"] | None = None
     """
     A request to include context from one or more MCP servers (including the caller), to be attached to the prompt.
     The client MAY ignore this request.
@@ -3085,7 +2809,7 @@ class CreateMessageRequestParams(WireModel):
     omit this field or use `"none"`, and SHOULD only use the deprecated values if the client declares
     {@link ClientCapabilities.sampling.context}.
     """
-    max_tokens: Annotated[int, Field(alias="maxTokens")]
+    max_tokens: int
     """
     The requested maximum number of tokens to sample (to prevent runaway completions).
 
@@ -3096,17 +2820,17 @@ class CreateMessageRequestParams(WireModel):
     """
     Optional metadata to pass through to the LLM provider. The format of this metadata is provider-specific.
     """
-    model_preferences: Annotated[ModelPreferences | None, Field(alias="modelPreferences")] = None
+    model_preferences: ModelPreferences | None = None
     """
     The server's preferences for which model to select. The client MAY ignore these preferences.
     """
-    stop_sequences: Annotated[list[str] | None, Field(alias="stopSequences")] = None
-    system_prompt: Annotated[str | None, Field(alias="systemPrompt")] = None
+    stop_sequences: list[str] | None = None
+    system_prompt: str | None = None
     """
     An optional system prompt the server wants to use for sampling. The client MAY modify or omit this prompt.
     """
     temperature: float | None = None
-    tool_choice: Annotated[ToolChoice | None, Field(alias="toolChoice")] = None
+    tool_choice: ToolChoice | None = None
     """
     Controls how the model uses tools.
     The client MUST return an error if this field is provided but {@link ClientCapabilities.sampling.tools} is not declared.
@@ -3119,7 +2843,8 @@ class CreateMessageRequestParams(WireModel):
     """
 
 
-class DiscoverRequest(WireModel):
+@dataclass(kw_only=True)
+class DiscoverRequest:
     """
     A request from the client asking the server to advertise its supported
     protocol versions, capabilities, and other metadata. Servers **MUST**
@@ -3127,25 +2852,20 @@ class DiscoverRequest(WireModel):
     to — version negotiation can also happen inline via per-request `_meta`.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["server/discover"]
     params: RequestParams
 
 
-class DiscoverResult(WireModel):
+@dataclass(kw_only=True)
+class DiscoverResult:
     """
     The result returned by the server for a {@link DiscoverRequestserver/discover} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    cache_scope: Annotated[Literal["private", "public"], Field(alias="cacheScope")]
+    meta: ResultMetaObject | None = None
+    cache_scope: Literal["private", "public"]
     """
     Indicates the intended scope of the cached response, analogous to HTTP
     `Cache-Control: public` vs `Cache-Control: private`.
@@ -3171,7 +2891,7 @@ class DiscoverResult(WireModel):
     focus on information that helps the model use the server effectively
     and should not duplicate information already in tool descriptions.
     """
-    result_type: Annotated[str, Field(alias="resultType")]
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -3181,12 +2901,12 @@ class DiscoverResult(WireModel):
     server implementing an earlier protocol version (which does not include
     `resultType`), the client MUST treat the absent field as `"complete"`.
     """
-    supported_versions: Annotated[list[str], Field(alias="supportedVersions")]
+    supported_versions: list[str]
     """
     MCP Protocol Versions this server supports. The client should choose a
     version from this list for use in subsequent requests.
     """
-    ttl_ms: Annotated[int, Field(alias="ttlMs", ge=0)]
+    ttl_ms: int
     """
     A hint from the server indicating how long (in milliseconds) the
     client MAY cache this response before re-fetching. Semantics are
@@ -3199,68 +2919,61 @@ class DiscoverResult(WireModel):
     """
 
 
-class DiscoverResultResponse(WireModel):
+@dataclass(kw_only=True)
+class DiscoverResultResponse:
     """
     A successful response from the server for a {@link DiscoverRequestserver/discover} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: DiscoverResult
 
 
-class GetPromptRequest(WireModel):
+@dataclass(kw_only=True)
+class GetPromptRequest:
     """
     Used by the client to get a prompt provided by the server.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["prompts/get"]
     params: GetPromptRequestParams
 
 
-class GetPromptRequestParams(WireModel):
+@dataclass(kw_only=True)
+class GetPromptRequestParams:
     """
     Parameters for a `prompts/get` request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
     arguments: dict[str, str] | None = None
     """
     Arguments to use for templating the prompt.
     """
-    input_responses: Annotated[InputResponses | None, Field(alias="inputResponses")] = None
+    input_responses: InputResponses | None = None
     name: str
     """
     The name of the prompt or prompt template.
     """
-    request_state: Annotated[str | None, Field(alias="requestState")] = None
+    request_state: str | None = None
 
 
-class GetPromptResultResponse(WireModel):
+@dataclass(kw_only=True)
+class GetPromptResultResponse:
     """
     A successful response from the server for a {@link GetPromptRequestprompts/get} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: InputRequiredResult | GetPromptResult
 
 
-class InputRequiredResult(WireModel):
+@dataclass(kw_only=True)
+class InputRequiredResult:
     """
     An InputRequiredResult sent by the server to indicate that additional input is needed
     before the request can be completed.
@@ -3268,13 +2981,10 @@ class InputRequiredResult(WireModel):
     At least one of `inputRequests` or `requestState` MUST be present.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[ResultMetaObject | None, Field(alias="_meta")] = None
-    input_requests: Annotated[InputRequests | None, Field(alias="inputRequests")] = None
-    request_state: Annotated[str | None, Field(alias="requestState")] = None
-    result_type: Annotated[str, Field(alias="resultType")]
+    meta: ResultMetaObject | None = None
+    input_requests: InputRequests | None = None
+    request_state: str | None = None
+    result_type: str
     """
     Indicates the type of the result, which allows the client to determine
     how to parse the result object.
@@ -3286,89 +2996,75 @@ class InputRequiredResult(WireModel):
     """
 
 
-class InputResponseRequestParams(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
-    input_responses: Annotated[InputResponses | None, Field(alias="inputResponses")] = None
-    request_state: Annotated[str | None, Field(alias="requestState")] = None
+@dataclass(kw_only=True)
+class InputResponseRequestParams:
+    meta: RequestMetaObject
+    input_responses: InputResponses | None = None
+    request_state: str | None = None
 
 
-class ListPromptsRequest(WireModel):
+@dataclass(kw_only=True)
+class ListPromptsRequest:
     """
     Sent from the client to request a list of prompts and prompt templates the server has.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["prompts/list"]
     params: PaginatedRequestParams
 
 
-class ListResourceTemplatesRequest(WireModel):
+@dataclass(kw_only=True)
+class ListResourceTemplatesRequest:
     """
     Sent from the client to request a list of resource templates the server has.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["resources/templates/list"]
     params: PaginatedRequestParams
 
 
-class ListResourcesRequest(WireModel):
+@dataclass(kw_only=True)
+class ListResourcesRequest:
     """
     Sent from the client to request a list of resources the server has.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["resources/list"]
     params: PaginatedRequestParams
 
 
-class ListToolsRequest(WireModel):
+@dataclass(kw_only=True)
+class ListToolsRequest:
     """
     Sent from the client to request a list of tools the server has.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["tools/list"]
     params: PaginatedRequestParams
 
 
-class Data(WireModel):
+@dataclass(kw_only=True)
+class Data:
     """
     Additional information about the error. The value of this member is defined by the sender (e.g. detailed error information, nested errors etc.).
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    required_capabilities: Annotated[ClientCapabilities, Field(alias="requiredCapabilities")]
+    required_capabilities: ClientCapabilities
     """
     The capabilities the server requires from the client to process this request.
     """
 
 
+@dataclass(kw_only=True)
 class Error2(Error):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     code: Literal[-32021]
     """
     The error type that occurred.
@@ -3379,40 +3075,34 @@ class Error2(Error):
     """
 
 
-class MissingRequiredClientCapabilityError(WireModel):
+@dataclass(kw_only=True)
+class MissingRequiredClientCapabilityError:
     """
     Returned when processing a request requires a capability the client did not
     declare in `clientCapabilities`. For HTTP, the response status code MUST be
     `400 Bad Request`.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     error: Error2
     id: RequestId | None = None
     jsonrpc: Literal["2.0"]
 
 
-class PaginatedRequest(WireModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+@dataclass(kw_only=True)
+class PaginatedRequest:
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: str
     params: PaginatedRequestParams
 
 
-class PaginatedRequestParams(WireModel):
+@dataclass(kw_only=True)
+class PaginatedRequestParams:
     """
     Common params for paginated requests.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
     cursor: str | None = None
     """
     An opaque token representing the current pagination position.
@@ -3420,61 +3110,51 @@ class PaginatedRequestParams(WireModel):
     """
 
 
-class ReadResourceRequest(WireModel):
+@dataclass(kw_only=True)
+class ReadResourceRequest:
     """
     Sent from the client to the server, to read a specific resource URI.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["resources/read"]
     params: ReadResourceRequestParams
 
 
-class ReadResourceRequestParams(WireModel):
+@dataclass(kw_only=True)
+class ReadResourceRequestParams:
     """
     Parameters for a `resources/read` request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
-    input_responses: Annotated[InputResponses | None, Field(alias="inputResponses")] = None
-    request_state: Annotated[str | None, Field(alias="requestState")] = None
+    meta: RequestMetaObject
+    input_responses: InputResponses | None = None
+    request_state: str | None = None
     uri: str
     """
     The URI of the resource. The URI can use any protocol; it is up to the server how to interpret it.
     """
 
 
-class ReadResourceResultResponse(WireModel):
+@dataclass(kw_only=True)
+class ReadResourceResultResponse:
     """
     A successful response from the server for a {@link ReadResourceRequestresources/read} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     result: InputRequiredResult | ReadResourceResult
 
 
-class RequestMetaObject(WireModel):
+@dataclass(kw_only=True)
+class RequestMetaObject:
     """
     Extends {@link MetaObject} with additional request-specific fields. All key naming rules from `MetaObject` apply.
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    io_modelcontextprotocol_client_capabilities: Annotated[
-        ClientCapabilities, Field(alias="io.modelcontextprotocol/clientCapabilities")
-    ]
+    io_modelcontextprotocol_client_capabilities: ClientCapabilities
     """
     The client's capabilities for this specific request. Required.
 
@@ -3482,9 +3162,7 @@ class RequestMetaObject(WireModel):
     an empty object means the client supports no optional capabilities.
     Servers MUST NOT infer capabilities from prior requests.
     """
-    io_modelcontextprotocol_client_info: Annotated[
-        Implementation | None, Field(alias="io.modelcontextprotocol/clientInfo")
-    ] = None
+    io_modelcontextprotocol_client_info: Implementation | None = None
     """
     Identifies the client software making the request. Clients SHOULD
     include this field on every request unless specifically configured not
@@ -3498,9 +3176,7 @@ class RequestMetaObject(WireModel):
     SHOULD NOT use it to change their behavior, and SHOULD NOT rely on it for
     security decisions.
     """
-    io_modelcontextprotocol_log_level: Annotated[
-        LoggingLevel | None, Field(alias="io.modelcontextprotocol/logLevel")
-    ] = None
+    io_modelcontextprotocol_log_level: LoggingLevel | None = None
     """
     The desired log level for this request. Optional.
 
@@ -3508,7 +3184,7 @@ class RequestMetaObject(WireModel):
     notifications for this request. The client opts in to log messages by
     explicitly setting a level. Replaces the former `logging/setLevel` RPC.
     """
-    io_modelcontextprotocol_protocol_version: Annotated[str, Field(alias="io.modelcontextprotocol/protocolVersion")]
+    io_modelcontextprotocol_protocol_version: str
     """
     The MCP Protocol Version being used for this request. Required.
 
@@ -3517,46 +3193,40 @@ class RequestMetaObject(WireModel):
     server does not support the requested version, it MUST return an
     {@link UnsupportedProtocolVersionError}.
     """
-    progress_token: Annotated[ProgressToken | None, Field(alias="progressToken")] = None
+    progress_token: ProgressToken | None = None
     """
     If specified, the caller is requesting out-of-band progress notifications for this request (as represented by {@link ProgressNotificationnotifications/progress}). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
     """
 
 
-class RequestParams(WireModel):
+@dataclass(kw_only=True)
+class RequestParams:
     """
     Common params for any request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
 
 
-class ResourceRequestParams(WireModel):
+@dataclass(kw_only=True)
+class ResourceRequestParams:
     """
     Common params for resource-related requests.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
     uri: str
     """
     The URI of the resource. The URI can use any protocol; it is up to the server how to interpret it.
     """
 
 
-class ServerCapabilities(WireModel):
+@dataclass(kw_only=True)
+class ServerCapabilities:
     """
     Capabilities that a server may support. Known capabilities are defined here, in this schema, but this is not a closed set: any server can define its own, additional capabilities.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     completions: JSONObject | None = None
     """
     Present if the server supports argument autocompletion suggestions.
@@ -3592,31 +3262,27 @@ class ServerCapabilities(WireModel):
     """
 
 
-class SubscriptionsListenRequest(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionsListenRequest:
     """
     Sent from the client to open a long-lived channel for receiving notifications
     outside the context of a specific request. Replaces the previous HTTP GET
     endpoint and ensures consistent behavior between HTTP and STDIO.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
     id: RequestId
     jsonrpc: Literal["2.0"]
     method: Literal["subscriptions/listen"]
     params: SubscriptionsListenRequestParams
 
 
-class SubscriptionsListenRequestParams(WireModel):
+@dataclass(kw_only=True)
+class SubscriptionsListenRequestParams:
     """
     Parameters for a {@link SubscriptionsListenRequestsubscriptions/listen} request.
     """
 
-    model_config = ConfigDict(
-        extra="ignore",
-    )
-    meta: Annotated[RequestMetaObject, Field(alias="_meta")]
+    meta: RequestMetaObject
     notifications: SubscriptionFilter
     """
     The notifications the client opts in to on this stream. The server
@@ -3625,26 +3291,13 @@ class SubscriptionsListenRequestParams(WireModel):
     """
 
 
-class InputRequest(RootModel[CreateMessageRequest | ListRootsRequest | ElicitRequest]):
+@dataclass(kw_only=True)
+class InputRequest:
     root: CreateMessageRequest | ListRootsRequest | ElicitRequest
 
 
-class ServerResult(
-    RootModel[
-        Result
-        | InputRequiredResult
-        | DiscoverResult
-        | ListResourcesResult
-        | ListResourceTemplatesResult
-        | ReadResourceResult
-        | SubscriptionsListenResult
-        | ListPromptsResult
-        | GetPromptResult
-        | ListToolsResult
-        | CallToolResult
-        | CompleteResult
-    ]
-):
+@dataclass(kw_only=True)
+class ServerResult:
     root: (
         Result
         | InputRequiredResult
@@ -3661,20 +3314,8 @@ class ServerResult(
     )
 
 
-class ClientRequest(
-    RootModel[
-        DiscoverRequest
-        | ListResourcesRequest
-        | ListResourceTemplatesRequest
-        | ReadResourceRequest
-        | SubscriptionsListenRequest
-        | ListPromptsRequest
-        | GetPromptRequest
-        | ListToolsRequest
-        | CallToolRequest
-        | CompleteRequest
-    ]
-):
+@dataclass(kw_only=True)
+class ClientRequest:
     root: (
         DiscoverRequest
         | ListResourcesRequest
@@ -3689,7 +3330,8 @@ class ClientRequest(
     )
 
 
-class InputRequests(RootModel[dict[str, InputRequest]]):
+@dataclass(kw_only=True)
+class InputRequests:
     """
     A map of server-initiated requests that the client must fulfill.
     Keys are server-assigned identifiers; values are the request objects.
@@ -3698,49 +3340,21 @@ class InputRequests(RootModel[dict[str, InputRequest]]):
     root: dict[str, InputRequest]
 
 
-class JSONArray(RootModel[list["JSONValue"]]):
+@dataclass(kw_only=True)
+class JSONArray:
     root: list["JSONValue"]
 
 
-class JSONObject(RootModel[dict[str, "JSONValue"]]):
+@dataclass(kw_only=True)
+class JSONObject:
     root: dict[str, "JSONValue"]
 
 
-class JSONValue(RootModel[Union[JSONObject, list["JSONValue"], str | int | float | bool | None]]):
+@dataclass(kw_only=True)
+class JSONValue:
     root: Union[JSONObject, list["JSONValue"], str | int | float | bool | None]
 
 
 AnyCallToolResult = CallToolResult | InputRequiredResult
 AnyGetPromptResult = GetPromptResult | InputRequiredResult
 AnyReadResourceResult = ReadResourceResult | InputRequiredResult
-
-
-CallToolRequest.model_rebuild()
-CallToolRequestParams.model_rebuild()
-CallToolResultResponse.model_rebuild()
-Elicitation.model_rebuild()
-Sampling.model_rebuild()
-ClientCapabilities.model_rebuild()
-CompleteRequest.model_rebuild()
-CompleteRequestParams.model_rebuild()
-CreateMessageRequest.model_rebuild()
-CreateMessageRequestParams.model_rebuild()
-DiscoverRequest.model_rebuild()
-DiscoverResult.model_rebuild()
-GetPromptRequest.model_rebuild()
-GetPromptRequestParams.model_rebuild()
-GetPromptResultResponse.model_rebuild()
-InputRequiredResult.model_rebuild()
-InputResponseRequestParams.model_rebuild()
-ListPromptsRequest.model_rebuild()
-ListResourceTemplatesRequest.model_rebuild()
-ListResourcesRequest.model_rebuild()
-ListToolsRequest.model_rebuild()
-PaginatedRequest.model_rebuild()
-PaginatedRequestParams.model_rebuild()
-ReadResourceRequest.model_rebuild()
-ReadResourceRequestParams.model_rebuild()
-ServerCapabilities.model_rebuild()
-SubscriptionsListenRequest.model_rebuild()
-JSONArray.model_rebuild()
-JSONObject.model_rebuild()

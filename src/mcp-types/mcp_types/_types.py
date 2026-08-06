@@ -8,18 +8,12 @@ the negotiated version. Per-field docstrings note version availability. The
 
 from __future__ import annotations
 
-from typing import Annotated, Any, ClassVar, Final, Generic, Literal, TypeAlias, TypeVar, get_args
+import os
+from dataclasses import dataclass, field
+from typing import Any, ClassVar, Final, Generic, Literal, TypeAlias, TypeVar, get_args
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    FileUrl,
-    TypeAdapter,
-    model_validator,
-)
-from pydantic.alias_generators import to_camel
-from typing_extensions import NotRequired, Self, TypedDict
+from pydantic import FileUrl, TypeAdapter
+from typing_extensions import NotRequired, TypedDict
 
 from mcp_types.jsonrpc import RequestId
 
@@ -42,10 +36,9 @@ IconTheme = Literal["light", "dark"]
 """Theme an icon is designed for. Wire values of `Icon.theme` (2025-11-25+)."""
 
 
-class MCPModel(BaseModel):
+@dataclass(kw_only=True)
+class MCPModel:
     """Base class for all MCP protocol types."""
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 
 Meta: TypeAlias = dict[str, Any]
@@ -77,6 +70,7 @@ unverified - display, logging, and debugging only; never behavior or security.
 """
 
 
+@dataclass(kw_only=True)
 class RequestParamsMeta(TypedDict, extra_items=Any):
     """The `_meta` object on request params (schema name: `RequestMetaObject`).
 
@@ -93,8 +87,9 @@ class RequestParamsMeta(TypedDict, extra_items=Any):
     """
 
 
+@dataclass(kw_only=True)
 class RequestParams(MCPModel):
-    meta: RequestParamsMeta | None = Field(alias="_meta", default=None)
+    meta: RequestParamsMeta | None = field(default=None)
     """Metadata reserved by MCP for protocol-level concerns (wire name `_meta`).
 
     Carries the optional progress token and, on 2026-07-28+ sessions, the
@@ -104,6 +99,7 @@ class RequestParams(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class PaginatedRequestParams(RequestParams):
     cursor: str | None = None
     """An opaque token representing the current pagination position.
@@ -112,8 +108,9 @@ class PaginatedRequestParams(RequestParams):
     """
 
 
+@dataclass(kw_only=True)
 class NotificationParams(MCPModel):
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
@@ -125,6 +122,7 @@ NotificationParamsT = TypeVar("NotificationParamsT", bound=NotificationParams | 
 MethodT = TypeVar("MethodT", bound=str)
 
 
+@dataclass(kw_only=True)
 class Request(MCPModel, Generic[RequestParamsT, MethodT]):
     """Base class for JSON-RPC requests.
 
@@ -142,6 +140,7 @@ class Request(MCPModel, Generic[RequestParamsT, MethodT]):
     """
 
 
+@dataclass(kw_only=True)
 class PaginatedRequest(Request[PaginatedRequestParams | None, MethodT], Generic[MethodT]):
     """Base class for paginated requests, matching the schema's PaginatedRequest interface."""
 
@@ -150,6 +149,7 @@ class PaginatedRequest(Request[PaginatedRequestParams | None, MethodT], Generic[
     the session layer materializes it there. Optional on earlier versions."""
 
 
+@dataclass(kw_only=True)
 class Notification(MCPModel, Generic[NotificationParamsT, MethodT]):
     """Base class for JSON-RPC notifications."""
 
@@ -171,6 +171,7 @@ CORE_RESULT_TYPES: Final[frozenset[str]] = frozenset(get_args(_CoreResultType))
 """The `resultType` tags owned by the core protocol vocabulary; extension claims may not re-key them."""
 
 
+@dataclass(kw_only=True)
 class Result(MCPModel):
     """Base class for JSON-RPC results.
 
@@ -180,13 +181,14 @@ class Result(MCPModel):
     `InputRequiredResult` carries a literal.
     """
 
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class PaginatedResult(Result):
     next_cursor: str | None = None
     """
@@ -195,6 +197,7 @@ class PaginatedResult(Result):
     """
 
 
+@dataclass(kw_only=True)
 class CacheableResult(Result):
     """Base class for results that carry client-side caching directives (2026-07-28).
 
@@ -204,7 +207,7 @@ class CacheableResult(Result):
     accidentally enabling shared caching.
     """
 
-    ttl_ms: Annotated[int, Field(ge=0)] = 0
+    ttl_ms: int = 0
     """How long (ms) the client MAY cache this response, analogous to HTTP
     `Cache-Control: max-age`. 0 means immediately stale."""
 
@@ -213,6 +216,7 @@ class CacheableResult(Result):
     shared caches to serve the response to any user; "private" forbids that."""
 
 
+@dataclass(kw_only=True)
 class EmptyResult(Result):
     """A result that indicates success but carries no data.
 
@@ -227,6 +231,7 @@ class EmptyResult(Result):
     """None keeps the dump empty; see the class docstring."""
 
 
+@dataclass(kw_only=True)
 class BaseMetadata(MCPModel):
     """Base class for entities with a programmatic name and an optional display title."""
 
@@ -245,6 +250,7 @@ class BaseMetadata(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class Icon(MCPModel):
     """An optionally-sized icon for display in a user interface (2025-11-25+)."""
 
@@ -266,6 +272,7 @@ class Icon(MCPModel):
     """The theme this icon is designed for. If not provided, assume any theme."""
 
 
+@dataclass(kw_only=True)
 class Implementation(BaseMetadata):
     """Describes the name and version of an MCP implementation (`clientInfo` / `serverInfo`)."""
 
@@ -280,6 +287,7 @@ class Implementation(BaseMetadata):
     """Optional set of sized icons that the client can display in a user interface."""
 
 
+@dataclass(kw_only=True)
 class RootsCapability(MCPModel):
     """Capability for root operations.
 
@@ -291,6 +299,7 @@ class RootsCapability(MCPModel):
     """Whether the client supports notifications for changes to the roots list."""
 
 
+@dataclass(kw_only=True)
 class SamplingContextCapability(MCPModel):
     """Capability for context inclusion during sampling.
 
@@ -299,6 +308,7 @@ class SamplingContextCapability(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class SamplingToolsCapability(MCPModel):
     """Capability indicating support for tool calling during sampling.
 
@@ -307,14 +317,17 @@ class SamplingToolsCapability(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class FormElicitationCapability(MCPModel):
     """Capability for form mode elicitation."""
 
 
+@dataclass(kw_only=True)
 class UrlElicitationCapability(MCPModel):
     """Capability for URL mode elicitation (2025-11-25+)."""
 
 
+@dataclass(kw_only=True)
 class ElicitationCapability(MCPModel):
     """Capability for elicitation operations.
 
@@ -328,6 +341,7 @@ class ElicitationCapability(MCPModel):
     """Present if the client supports URL mode elicitation (2025-11-25 and later)."""
 
 
+@dataclass(kw_only=True)
 class SamplingCapability(MCPModel):
     """Sampling capability structure. Deprecated in 2026-07-28 (SEP-2577); shape unchanged."""
 
@@ -343,34 +357,41 @@ class SamplingCapability(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class TasksListCapability(MCPModel):
     """Capability for tasks listing operations (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class TasksCancelCapability(MCPModel):
     """Capability for tasks cancel operations (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class TasksCreateMessageCapability(MCPModel):
     """Capability for task-augmented sampling/createMessage requests (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class TasksSamplingCapability(MCPModel):
     """Capability for task-augmented sampling operations (2025-11-25 only)."""
 
     create_message: TasksCreateMessageCapability | None = None
 
 
+@dataclass(kw_only=True)
 class TasksCreateElicitationCapability(MCPModel):
     """Capability for task-augmented elicitation/create requests (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class TasksElicitationCapability(MCPModel):
     """Capability for task-augmented elicitation operations (2025-11-25 only)."""
 
     create: TasksCreateElicitationCapability | None = None
 
 
+@dataclass(kw_only=True)
 class ClientTasksRequestsCapability(MCPModel):
     """Specifies which request types the client can augment with tasks (2025-11-25 only)."""
 
@@ -378,6 +399,7 @@ class ClientTasksRequestsCapability(MCPModel):
     elicitation: TasksElicitationCapability | None = None
 
 
+@dataclass(kw_only=True)
 class ClientTasksCapability(MCPModel):
     """Capability for client tasks operations (2025-11-25 only)."""
 
@@ -386,6 +408,7 @@ class ClientTasksCapability(MCPModel):
     requests: ClientTasksRequestsCapability | None = None
 
 
+@dataclass(kw_only=True)
 class ClientCapabilities(MCPModel):
     """Capabilities a client may support.
 
@@ -411,6 +434,7 @@ class ClientCapabilities(MCPModel):
     """Present if the client supports task-augmented requests (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class UnsupportedProtocolVersionErrorData(MCPModel):
     """Error data for the -32022 unsupported-protocol-version error (2026-07-28)."""
 
@@ -420,6 +444,7 @@ class UnsupportedProtocolVersionErrorData(MCPModel):
     requested: str
 
 
+@dataclass(kw_only=True)
 class MissingRequiredClientCapabilityErrorData(MCPModel):
     """Error data for the -32021 missing-required-client-capability error (2026-07-28)."""
 
@@ -427,6 +452,7 @@ class MissingRequiredClientCapabilityErrorData(MCPModel):
     """The capabilities the server requires from the client to process this request."""
 
 
+@dataclass(kw_only=True)
 class PromptsCapability(MCPModel):
     """Capability for prompts operations."""
 
@@ -434,6 +460,7 @@ class PromptsCapability(MCPModel):
     """Whether this server supports notifications for changes to the prompt list."""
 
 
+@dataclass(kw_only=True)
 class ResourcesCapability(MCPModel):
     """Capability for resources operations."""
 
@@ -443,6 +470,7 @@ class ResourcesCapability(MCPModel):
     """Whether this server supports notifications for changes to the resource list."""
 
 
+@dataclass(kw_only=True)
 class ToolsCapability(MCPModel):
     """Capability for tools operations."""
 
@@ -450,30 +478,36 @@ class ToolsCapability(MCPModel):
     """Whether this server supports notifications for changes to the tool list."""
 
 
+@dataclass(kw_only=True)
 class LoggingCapability(MCPModel):
     """Capability for logging operations."""
 
 
+@dataclass(kw_only=True)
 class CompletionsCapability(MCPModel):
     """Capability for completions operations."""
 
 
+@dataclass(kw_only=True)
 class TasksCallCapability(MCPModel):
     """Capability for task-augmented tools/call requests (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class TasksToolsCapability(MCPModel):
     """Capability for task-augmented tool operations (2025-11-25 only)."""
 
     call: TasksCallCapability | None = None
 
 
+@dataclass(kw_only=True)
 class ServerTasksRequestsCapability(MCPModel):
     """Specifies which request types the server can augment with tasks (2025-11-25 only)."""
 
     tools: TasksToolsCapability | None = None
 
 
+@dataclass(kw_only=True)
 class ServerTasksCapability(MCPModel):
     """Capability for server tasks operations (2025-11-25 only)."""
 
@@ -482,6 +516,7 @@ class ServerTasksCapability(MCPModel):
     requests: ServerTasksRequestsCapability | None = None
 
 
+@dataclass(kw_only=True)
 class ServerCapabilities(MCPModel):
     """Capabilities that a server may support. Not a closed set."""
 
@@ -512,6 +547,7 @@ class ServerCapabilities(MCPModel):
     """Present if the server supports task-augmented requests (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class InitializeRequestParams(RequestParams):
     """Parameters for the `initialize` request.
 
@@ -524,6 +560,7 @@ class InitializeRequestParams(RequestParams):
     client_info: Implementation
 
 
+@dataclass(kw_only=True)
 class InitializeRequest(Request[InitializeRequestParams, Literal["initialize"]]):
     """This request is sent from the client to the server when it first connects, asking it
     to begin initialization.
@@ -536,6 +573,7 @@ class InitializeRequest(Request[InitializeRequestParams, Literal["initialize"]])
     params: InitializeRequestParams
 
 
+@dataclass(kw_only=True)
 class InitializeResult(Result):
     """After receiving an initialize request from the client, the server sends this response.
 
@@ -555,6 +593,7 @@ class InitializeResult(Result):
     """
 
 
+@dataclass(kw_only=True)
 class InitializedNotification(Notification[NotificationParams | None, Literal["notifications/initialized"]]):
     """This notification is sent from the client to the server after initialization has
     finished.
@@ -566,6 +605,7 @@ class InitializedNotification(Notification[NotificationParams | None, Literal["n
     params: NotificationParams | None = None
 
 
+@dataclass(kw_only=True)
 class PingRequest(Request[RequestParams | None, Literal["ping"]]):
     """A ping, issued by either the server or the client, to check that the other party is
     still alive. The receiver must promptly respond, or else may be disconnected.
@@ -577,6 +617,7 @@ class PingRequest(Request[RequestParams | None, Literal["ping"]]):
     params: RequestParams | None = None
 
 
+@dataclass(kw_only=True)
 class DiscoverRequest(Request[RequestParams | None, Literal["server/discover"]]):
     """Asks the server to advertise its supported protocol versions, capabilities,
     and other metadata (2026-07-28).
@@ -590,6 +631,7 @@ class DiscoverRequest(Request[RequestParams | None, Literal["server/discover"]])
     """Required on the 2026-07-28 wire (for `_meta`); the session layer materializes it."""
 
 
+@dataclass(kw_only=True)
 class DiscoverResult(CacheableResult):
     """The result returned by the server for a `server/discover` request (2026-07-28)."""
 
@@ -612,6 +654,7 @@ class DiscoverResult(CacheableResult):
 # in the request/notification unions below, so they are never dispatched.
 
 
+@dataclass(kw_only=True)
 class ToolExecution(MCPModel):
     """Execution-related properties for a tool (2025-11-25 only)."""
 
@@ -619,6 +662,7 @@ class ToolExecution(MCPModel):
     """Whether this tool supports task-augmented execution. Absent means "forbidden"."""
 
 
+@dataclass(kw_only=True)
 class TaskMetadata(MCPModel):
     """Metadata for augmenting a request with task execution (the `task` params field; 2025-11-25 only)."""
 
@@ -626,6 +670,7 @@ class TaskMetadata(MCPModel):
     """Requested duration in milliseconds to retain task from creation."""
 
 
+@dataclass(kw_only=True)
 class RelatedTaskMetadata(MCPModel):
     """Associates a message with a task, via `_meta["io.modelcontextprotocol/related-task"]` (2025-11-25 only)."""
 
@@ -636,6 +681,7 @@ TaskStatus = Literal["working", "input_required", "completed", "failed", "cancel
 """The status of a task (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class Task(MCPModel):
     """Data associated with a task (2025-11-25 only)."""
 
@@ -659,16 +705,19 @@ class Task(MCPModel):
     """Suggested polling interval in milliseconds."""
 
 
+@dataclass(kw_only=True)
 class CreateTaskResult(Result):
     """A response to a task-augmented request (2025-11-25 only)."""
 
     task: Task
 
 
+@dataclass(kw_only=True)
 class GetTaskRequestParams(RequestParams):
     task_id: str
 
 
+@dataclass(kw_only=True)
 class GetTaskRequest(Request[GetTaskRequestParams, Literal["tasks/get"]]):
     """A request to retrieve the state of a task (2025-11-25 only)."""
 
@@ -676,14 +725,17 @@ class GetTaskRequest(Request[GetTaskRequestParams, Literal["tasks/get"]]):
     params: GetTaskRequestParams
 
 
+@dataclass(kw_only=True)
 class GetTaskResult(Result, Task):
     """The response to a tasks/get request (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class CancelTaskRequestParams(RequestParams):
     task_id: str
 
 
+@dataclass(kw_only=True)
 class CancelTaskRequest(Request[CancelTaskRequestParams, Literal["tasks/cancel"]]):
     """A request to cancel a task (2025-11-25 only)."""
 
@@ -691,14 +743,17 @@ class CancelTaskRequest(Request[CancelTaskRequestParams, Literal["tasks/cancel"]
     params: CancelTaskRequestParams
 
 
+@dataclass(kw_only=True)
 class CancelTaskResult(Result, Task):
     """The response to a tasks/cancel request (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class TaskStatusNotificationParams(NotificationParams, Task):
     """Parameters for a `notifications/tasks/status` notification."""
 
 
+@dataclass(kw_only=True)
 class TaskStatusNotification(Notification[TaskStatusNotificationParams, Literal["notifications/tasks/status"]]):
     """An optional notification informing the requestor that a task's status has changed (2025-11-25 only)."""
 
@@ -706,12 +761,14 @@ class TaskStatusNotification(Notification[TaskStatusNotificationParams, Literal[
     params: TaskStatusNotificationParams
 
 
+@dataclass(kw_only=True)
 class GetTaskPayloadRequestParams(RequestParams):
     """Parameters for a tasks/result request."""
 
     task_id: str
 
 
+@dataclass(kw_only=True)
 class GetTaskPayloadRequest(Request[GetTaskPayloadRequestParams, Literal["tasks/result"]]):
     """A request to retrieve the result of a completed task (2025-11-25 only)."""
 
@@ -719,6 +776,7 @@ class GetTaskPayloadRequest(Request[GetTaskPayloadRequestParams, Literal["tasks/
     params: GetTaskPayloadRequestParams
 
 
+@dataclass(kw_only=True)
 class GetTaskPayloadResult(Result):
     """The response to a tasks/result request (2025-11-25 only).
 
@@ -729,18 +787,21 @@ class GetTaskPayloadResult(Result):
     """
 
 
+@dataclass(kw_only=True)
 class ListTasksRequest(PaginatedRequest[Literal["tasks/list"]]):
     """A request to retrieve a list of tasks (2025-11-25 only)."""
 
     method: Literal["tasks/list"] = "tasks/list"
 
 
+@dataclass(kw_only=True)
 class ListTasksResult(PaginatedResult):
     """The response to a tasks/list request (2025-11-25 only)."""
 
     tasks: list[Task]
 
 
+@dataclass(kw_only=True)
 class ProgressNotificationParams(NotificationParams):
     """Parameters for progress notifications."""
 
@@ -763,6 +824,7 @@ class ProgressNotificationParams(NotificationParams):
     """
 
 
+@dataclass(kw_only=True)
 class ProgressNotification(Notification[ProgressNotificationParams, Literal["notifications/progress"]]):
     """An out-of-band notification used to inform the receiver of a progress update for a long-running request."""
 
@@ -770,19 +832,21 @@ class ProgressNotification(Notification[ProgressNotificationParams, Literal["not
     params: ProgressNotificationParams
 
 
+@dataclass(kw_only=True)
 class ListResourcesRequest(PaginatedRequest[Literal["resources/list"]]):
     """Sent from the client to request a list of resources the server has."""
 
     method: Literal["resources/list"] = "resources/list"
 
 
+@dataclass(kw_only=True)
 class Annotations(MCPModel):
     """Optional annotations the client can use to inform how objects are used or displayed."""
 
     audience: list[Role] | None = None
     """Who the intended audience is, e.g. `["user", "assistant"]`."""
 
-    priority: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
+    priority: float | None = None
     """How important this data is for operating the server: 1 means effectively
     required, 0 means entirely optional."""
 
@@ -790,6 +854,7 @@ class Annotations(MCPModel):
     """ISO 8601 timestamp of when the item was last modified."""
 
 
+@dataclass(kw_only=True)
 class Resource(BaseMetadata):
     """A known resource that the server is capable of reading."""
 
@@ -814,10 +879,11 @@ class Resource(BaseMetadata):
     annotations: Annotations | None = None
     """Optional annotations for the client."""
 
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """See the MCP specification for notes on `_meta` usage."""
 
 
+@dataclass(kw_only=True)
 class ResourceTemplate(BaseMetadata):
     """A template description for resources available on the server."""
 
@@ -839,13 +905,14 @@ class ResourceTemplate(BaseMetadata):
     annotations: Annotations | None = None
     """Optional annotations for the client."""
 
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class ListResourcesResult(PaginatedResult, CacheableResult):
     """The server's response to a resources/list request from the client."""
 
@@ -854,12 +921,14 @@ class ListResourcesResult(PaginatedResult, CacheableResult):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class ListResourceTemplatesRequest(PaginatedRequest[Literal["resources/templates/list"]]):
     """Sent from the client to request a list of resource templates the server has."""
 
     method: Literal["resources/templates/list"] = "resources/templates/list"
 
 
+@dataclass(kw_only=True)
 class ListResourceTemplatesResult(PaginatedResult, CacheableResult):
     """The server's response to a resources/templates/list request from the client."""
 
@@ -868,6 +937,7 @@ class ListResourceTemplatesResult(PaginatedResult, CacheableResult):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class InputResponseRequestParams(RequestParams):
     """Base params for client requests that can carry responses to a server's
     input requests (2026-07-28 multi-round-trip flow).
@@ -882,6 +952,7 @@ class InputResponseRequestParams(RequestParams):
     """Opaque state from the `InputRequiredResult`, passed back verbatim on retry."""
 
 
+@dataclass(kw_only=True)
 class ReadResourceRequestParams(InputResponseRequestParams):
     uri: str
     """
@@ -890,6 +961,7 @@ class ReadResourceRequestParams(InputResponseRequestParams):
     """
 
 
+@dataclass(kw_only=True)
 class ReadResourceRequest(Request[ReadResourceRequestParams, Literal["resources/read"]]):
     """Sent from the client to the server, to read a specific resource URI."""
 
@@ -897,6 +969,7 @@ class ReadResourceRequest(Request[ReadResourceRequestParams, Literal["resources/
     params: ReadResourceRequestParams
 
 
+@dataclass(kw_only=True)
 class ResourceContents(MCPModel):
     """The contents of a specific resource or sub-resource."""
 
@@ -904,13 +977,14 @@ class ResourceContents(MCPModel):
     """The URI of this resource."""
     mime_type: str | None = None
     """The MIME type of this resource, if known."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class TextResourceContents(ResourceContents):
     """Text contents of a resource."""
 
@@ -921,6 +995,7 @@ class TextResourceContents(ResourceContents):
     """
 
 
+@dataclass(kw_only=True)
 class BlobResourceContents(ResourceContents):
     """Binary contents of a resource."""
 
@@ -928,6 +1003,7 @@ class BlobResourceContents(ResourceContents):
     """A base64-encoded string representing the binary data of the item."""
 
 
+@dataclass(kw_only=True)
 class ReadResourceResult(CacheableResult):
     """The server's response to a resources/read request from the client."""
 
@@ -938,6 +1014,7 @@ class ReadResourceResult(CacheableResult):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class ResourceListChangedNotification(
     Notification[NotificationParams | None, Literal["notifications/resources/list_changed"]]
 ):
@@ -952,6 +1029,7 @@ class ResourceListChangedNotification(
     params: NotificationParams | None = None
 
 
+@dataclass(kw_only=True)
 class SubscribeRequestParams(RequestParams):
     """Parameters for subscribing to a resource.
 
@@ -965,6 +1043,7 @@ class SubscribeRequestParams(RequestParams):
     """
 
 
+@dataclass(kw_only=True)
 class SubscribeRequest(Request[SubscribeRequestParams, Literal["resources/subscribe"]]):
     """Sent from the client to request resources/updated notifications from the server
     whenever a particular resource changes.
@@ -977,6 +1056,7 @@ class SubscribeRequest(Request[SubscribeRequestParams, Literal["resources/subscr
     params: SubscribeRequestParams
 
 
+@dataclass(kw_only=True)
 class UnsubscribeRequestParams(RequestParams):
     """Parameters for a resources/unsubscribe request.
 
@@ -987,6 +1067,7 @@ class UnsubscribeRequestParams(RequestParams):
     """The URI of the resource to unsubscribe from."""
 
 
+@dataclass(kw_only=True)
 class UnsubscribeRequest(Request[UnsubscribeRequestParams, Literal["resources/unsubscribe"]]):
     """Sent from the client to request cancellation of resources/updated notifications
     from the server. This should follow a previous resources/subscribe request.
@@ -999,6 +1080,7 @@ class UnsubscribeRequest(Request[UnsubscribeRequestParams, Literal["resources/un
     params: UnsubscribeRequestParams
 
 
+@dataclass(kw_only=True)
 class ResourceUpdatedNotificationParams(NotificationParams):
     uri: str
     """
@@ -1007,6 +1089,7 @@ class ResourceUpdatedNotificationParams(NotificationParams):
     """
 
 
+@dataclass(kw_only=True)
 class ResourceUpdatedNotification(
     Notification[ResourceUpdatedNotificationParams, Literal["notifications/resources/updated"]]
 ):
@@ -1021,6 +1104,7 @@ class ResourceUpdatedNotification(
     params: ResourceUpdatedNotificationParams
 
 
+@dataclass(kw_only=True)
 class SubscriptionFilter(MCPModel):
     """The set of notification types a client opts in to via `subscriptions/listen` (2026-07-28).
 
@@ -1029,8 +1113,6 @@ class SubscriptionFilter(MCPModel):
     server agreed to honor. Extensions merge additional keys (e.g. `taskIds`),
     so unknown keys round-trip.
     """
-
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, extra="allow")
 
     tools_list_changed: bool | None = None
     """If true, receive notifications/tools/list_changed."""
@@ -1045,11 +1127,13 @@ class SubscriptionFilter(MCPModel):
     """Subscribe to notifications/resources/updated for these resource URIs."""
 
 
+@dataclass(kw_only=True)
 class SubscriptionsListenRequestParams(RequestParams):
     notifications: SubscriptionFilter
     """The notifications the client opts in to on this stream."""
 
 
+@dataclass(kw_only=True)
 class SubscriptionsListenRequest(Request[SubscriptionsListenRequestParams, Literal["subscriptions/listen"]]):
     """Opens a long-lived channel for receiving notifications outside the context
     of a specific request (2026-07-28).
@@ -1059,12 +1143,14 @@ class SubscriptionsListenRequest(Request[SubscriptionsListenRequestParams, Liter
     params: SubscriptionsListenRequestParams
 
 
+@dataclass(kw_only=True)
 class SubscriptionsAcknowledgedNotificationParams(NotificationParams):
     notifications: SubscriptionFilter
     """The subset of requested notification types the server agreed to honor.
     Unsupported types are omitted."""
 
 
+@dataclass(kw_only=True)
 class SubscriptionsAcknowledgedNotification(
     Notification[
         SubscriptionsAcknowledgedNotificationParams,
@@ -1079,6 +1165,7 @@ class SubscriptionsAcknowledgedNotification(
     params: SubscriptionsAcknowledgedNotificationParams
 
 
+@dataclass(kw_only=True)
 class SubscriptionsListenResult(Result):
     """Signals that a `subscriptions/listen` stream has ended gracefully (2026-07-28).
 
@@ -1094,12 +1181,14 @@ class SubscriptionsListenResult(Result):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class ListPromptsRequest(PaginatedRequest[Literal["prompts/list"]]):
     """Sent from the client to request a list of prompts and prompt templates the server has."""
 
     method: Literal["prompts/list"] = "prompts/list"
 
 
+@dataclass(kw_only=True)
 class PromptArgument(BaseMetadata):
     """Describes an argument that a prompt can accept."""
 
@@ -1109,6 +1198,7 @@ class PromptArgument(BaseMetadata):
     """Whether this argument must be provided."""
 
 
+@dataclass(kw_only=True)
 class Prompt(BaseMetadata):
     """A prompt or prompt template that the server offers."""
 
@@ -1118,13 +1208,14 @@ class Prompt(BaseMetadata):
     """A list of arguments to use for templating the prompt."""
     icons: list[Icon] | None = None
     """An optional list of icons for this prompt."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class ListPromptsResult(PaginatedResult, CacheableResult):
     """The server's response to a prompts/list request from the client."""
 
@@ -1133,6 +1224,7 @@ class ListPromptsResult(PaginatedResult, CacheableResult):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class GetPromptRequestParams(InputResponseRequestParams):
     name: str
     """The name of the prompt or prompt template."""
@@ -1140,6 +1232,7 @@ class GetPromptRequestParams(InputResponseRequestParams):
     """Arguments to use for templating the prompt."""
 
 
+@dataclass(kw_only=True)
 class GetPromptRequest(Request[GetPromptRequestParams, Literal["prompts/get"]]):
     """Used by the client to get a prompt provided by the server."""
 
@@ -1147,6 +1240,7 @@ class GetPromptRequest(Request[GetPromptRequestParams, Literal["prompts/get"]]):
     params: GetPromptRequestParams
 
 
+@dataclass(kw_only=True)
 class TextContent(MCPModel):
     """Text provided to or from an LLM."""
 
@@ -1155,13 +1249,14 @@ class TextContent(MCPModel):
     """The text content of the message."""
     annotations: Annotations | None = None
     """Optional annotations for the client."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class ImageContent(MCPModel):
     """An image provided to or from an LLM."""
 
@@ -1175,10 +1270,11 @@ class ImageContent(MCPModel):
     """
     annotations: Annotations | None = None
     """Optional annotations for the client."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """See the MCP specification's "General fields: _meta" section for notes on _meta usage."""
 
 
+@dataclass(kw_only=True)
 class AudioContent(MCPModel):
     """Audio provided to or from an LLM."""
 
@@ -1192,13 +1288,14 @@ class AudioContent(MCPModel):
     """
     annotations: Annotations | None = None
     """Optional annotations for the client."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class ToolUseContent(MCPModel):
     """An assistant's request to invoke a tool during sampling (2025-11-25+).
 
@@ -1219,11 +1316,12 @@ class ToolUseContent(MCPModel):
     input: dict[str, Any]
     """Arguments to pass to the tool. Must conform to the tool's inputSchema."""
 
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """Optional metadata. Clients SHOULD preserve this in subsequent sampling
     requests to enable caching optimizations."""
 
 
+@dataclass(kw_only=True)
 class ToolResultContent(MCPModel):
     """The result of a tool use, provided by the user back to the assistant (2025-11-25+).
 
@@ -1237,7 +1335,7 @@ class ToolResultContent(MCPModel):
     tool_use_id: str
     """The `id` of the `ToolUseContent` this result corresponds to."""
 
-    content: list[ContentBlock] = []
+    content: list[ContentBlock] = field(default_factory=list)
     """The unstructured result content (same format as `CallToolResult.content`)."""
 
     structured_content: Any = None
@@ -1247,7 +1345,7 @@ class ToolResultContent(MCPModel):
     is_error: bool | None = None
     """Whether the tool use resulted in an error. Absent is equivalent to false."""
 
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """Optional metadata. Clients SHOULD preserve this in subsequent sampling
     requests to enable caching optimizations."""
 
@@ -1267,6 +1365,7 @@ Used for backwards-compatible CreateMessageResult when tools are not used.
 """
 
 
+@dataclass(kw_only=True)
 class SamplingMessage(MCPModel):
     """Describes a message issued to or received from an LLM API."""
 
@@ -1276,7 +1375,7 @@ class SamplingMessage(MCPModel):
     Message content. Can be a single content block or an array of content blocks
     for multi-modal messages and tool interactions.
     """
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
@@ -1289,6 +1388,7 @@ class SamplingMessage(MCPModel):
         return self.content if isinstance(self.content, list) else [self.content]
 
 
+@dataclass(kw_only=True)
 class EmbeddedResource(MCPModel):
     """The contents of a resource, embedded into a prompt or tool call result.
 
@@ -1300,13 +1400,14 @@ class EmbeddedResource(MCPModel):
     resource: TextResourceContents | BlobResourceContents
     annotations: Annotations | None = None
     """Optional annotations for the client."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class ResourceLink(Resource):
     """A resource that the server is capable of reading, included in a prompt or tool call result.
 
@@ -1320,6 +1421,7 @@ ContentBlock = TextContent | ImageContent | AudioContent | ResourceLink | Embedd
 """A content block that can be used in prompts and tool results."""
 
 
+@dataclass(kw_only=True)
 class PromptMessage(MCPModel):
     """Describes a message returned as part of a prompt.
 
@@ -1330,6 +1432,7 @@ class PromptMessage(MCPModel):
     content: ContentBlock
 
 
+@dataclass(kw_only=True)
 class GetPromptResult(Result):
     """The server's response to a prompts/get request from the client."""
 
@@ -1342,6 +1445,7 @@ class GetPromptResult(Result):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class PromptListChangedNotification(
     Notification[NotificationParams | None, Literal["notifications/prompts/list_changed"]]
 ):
@@ -1356,12 +1460,14 @@ class PromptListChangedNotification(
     params: NotificationParams | None = None
 
 
+@dataclass(kw_only=True)
 class ListToolsRequest(PaginatedRequest[Literal["tools/list"]]):
     """Sent from the client to request a list of tools the server has."""
 
     method: Literal["tools/list"] = "tools/list"
 
 
+@dataclass(kw_only=True)
 class ToolAnnotations(MCPModel):
     """Additional properties describing a Tool to clients.
 
@@ -1408,6 +1514,7 @@ class ToolAnnotations(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class Tool(BaseMetadata):
     """Definition for a tool the client can call."""
 
@@ -1433,10 +1540,11 @@ class Tool(BaseMetadata):
     annotations: ToolAnnotations | None = None
     """Optional additional tool information.
     Display-name precedence: `title`, `annotations.title`, then `name`."""
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """See the MCP specification for notes on `_meta` usage."""
 
 
+@dataclass(kw_only=True)
 class ListToolsResult(PaginatedResult, CacheableResult):
     """The server's response to a tools/list request from the client."""
 
@@ -1446,6 +1554,7 @@ class ListToolsResult(PaginatedResult, CacheableResult):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class CallToolRequestParams(InputResponseRequestParams):
     name: str
     arguments: dict[str, Any] | None = None
@@ -1453,6 +1562,7 @@ class CallToolRequestParams(InputResponseRequestParams):
     """If specified, the caller requests task-augmented execution (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class CallToolRequest(Request[CallToolRequestParams, Literal["tools/call"]]):
     """Used by the client to invoke a tool provided by the server."""
 
@@ -1460,6 +1570,7 @@ class CallToolRequest(Request[CallToolRequestParams, Literal["tools/call"]]):
     params: CallToolRequestParams
 
 
+@dataclass(kw_only=True)
 class CallToolResult(Result):
     """The server's response to a tool call.
 
@@ -1484,6 +1595,7 @@ class CallToolResult(Result):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class ToolListChangedNotification(Notification[NotificationParams | None, Literal["notifications/tools/list_changed"]]):
     """An optional notification from the server to the client, informing it that the list
     of tools it offers has changed.
@@ -1504,6 +1616,7 @@ in 2026-07-28 (SEP-2577); the level scale is unchanged across versions.
 """
 
 
+@dataclass(kw_only=True)
 class SetLevelRequestParams(RequestParams):
     """Parameters for setting the logging level.
 
@@ -1515,6 +1628,7 @@ class SetLevelRequestParams(RequestParams):
     The server should send all logs at this level and higher (more severe)."""
 
 
+@dataclass(kw_only=True)
 class SetLevelRequest(Request[SetLevelRequestParams, Literal["logging/setLevel"]]):
     """A request from the client to the server, to enable or adjust logging.
 
@@ -1526,6 +1640,7 @@ class SetLevelRequest(Request[SetLevelRequestParams, Literal["logging/setLevel"]
     params: SetLevelRequestParams
 
 
+@dataclass(kw_only=True)
 class LoggingMessageNotificationParams(NotificationParams):
     level: LoggingLevel
     """The severity of this log message."""
@@ -1538,6 +1653,7 @@ class LoggingMessageNotificationParams(NotificationParams):
     """
 
 
+@dataclass(kw_only=True)
 class LoggingMessageNotification(Notification[LoggingMessageNotificationParams, Literal["notifications/message"]]):
     """Notification of a log message passed from server to client.
 
@@ -1557,6 +1673,7 @@ IncludeContext = Literal["none", "thisServer", "allServers"]
 """
 
 
+@dataclass(kw_only=True)
 class ModelHint(MCPModel):
     """Hints to use for model selection.
 
@@ -1573,6 +1690,7 @@ class ModelHint(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class ModelPreferences(MCPModel):
     """The server's preferences for model selection, requested of the client during
     sampling.
@@ -1623,6 +1741,7 @@ class ModelPreferences(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class ToolChoice(MCPModel):
     """Controls tool selection behavior for sampling requests (2025-11-25+).
 
@@ -1639,6 +1758,7 @@ class ToolChoice(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class CreateMessageRequestParams(RequestParams):
     messages: list[SamplingMessage]
     """The conversation to sample from."""
@@ -1671,6 +1791,7 @@ class CreateMessageRequestParams(RequestParams):
     """If specified, the caller requests task-augmented execution (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class CreateMessageRequest(Request[CreateMessageRequestParams, Literal["sampling/createMessage"]]):
     """A request from the server to sample an LLM via the client.
 
@@ -1691,6 +1812,7 @@ An open union to allow provider-specific stop reasons. "toolUse" is 2025-11-25+.
 """
 
 
+@dataclass(kw_only=True)
 class CreateMessageResult(Result):
     """The client's response to a sampling/createMessage request from the server.
 
@@ -1711,6 +1833,7 @@ class CreateMessageResult(Result):
     """The reason why sampling stopped, if known."""
 
 
+@dataclass(kw_only=True)
 class CreateMessageResultWithTools(Result):
     """The client's response to a sampling/createMessage request when tools were provided.
 
@@ -1739,6 +1862,7 @@ class CreateMessageResultWithTools(Result):
         return self.content if isinstance(self.content, list) else [self.content]
 
 
+@dataclass(kw_only=True)
 class ResourceTemplateReference(MCPModel):
     """A reference to a resource or resource template definition."""
 
@@ -1748,6 +1872,7 @@ class ResourceTemplateReference(MCPModel):
 
 
 # Not BaseMetadata: inheriting would reorder dump keys for existing callers.
+@dataclass(kw_only=True)
 class PromptReference(MCPModel):
     """Identifies a prompt."""
 
@@ -1758,6 +1883,7 @@ class PromptReference(MCPModel):
     """Human-readable display title. If not provided, `name` should be used for display."""
 
 
+@dataclass(kw_only=True)
 class CompletionArgument(MCPModel):
     """The argument's information for completion requests."""
 
@@ -1767,6 +1893,7 @@ class CompletionArgument(MCPModel):
     """The value of the argument to use for completion matching."""
 
 
+@dataclass(kw_only=True)
 class CompletionContext(MCPModel):
     """Additional, optional context for completions."""
 
@@ -1774,6 +1901,7 @@ class CompletionContext(MCPModel):
     """Previously-resolved variables in a URI template or prompt."""
 
 
+@dataclass(kw_only=True)
 class CompleteRequestParams(RequestParams):
     ref: ResourceTemplateReference | PromptReference
     """The prompt or resource-template reference to complete against."""
@@ -1782,6 +1910,7 @@ class CompleteRequestParams(RequestParams):
     """Additional, optional context for completions."""
 
 
+@dataclass(kw_only=True)
 class CompleteRequest(Request[CompleteRequestParams, Literal["completion/complete"]]):
     """A request from the client to the server, to ask for completion options."""
 
@@ -1789,6 +1918,7 @@ class CompleteRequest(Request[CompleteRequestParams, Literal["completion/complet
     params: CompleteRequestParams
 
 
+@dataclass(kw_only=True)
 class Completion(MCPModel):
     """Completion information."""
 
@@ -1806,6 +1936,7 @@ class Completion(MCPModel):
     """
 
 
+@dataclass(kw_only=True)
 class CompleteResult(Result):
     """The server's response to a completion/complete request."""
 
@@ -1816,6 +1947,7 @@ class CompleteResult(Result):
     """See `ResultType`. Always serialized; older peers ignore it."""
 
 
+@dataclass(kw_only=True)
 class ListRootsRequest(Request[RequestParams | None, Literal["roots/list"]]):
     """Sent from the server to request a list of root URIs from the client. Roots allow
     servers to ask for specific directories or files to operate on. A common example
@@ -1835,6 +1967,7 @@ class ListRootsRequest(Request[RequestParams | None, Literal["roots/list"]]):
     to server-to-client payloads)."""
 
 
+@dataclass(kw_only=True)
 class Root(MCPModel):
     """Represents a root directory or file that the server can operate on.
 
@@ -1853,13 +1986,14 @@ class Root(MCPModel):
     identifier for the root, which may be useful for display purposes or for
     referencing the root in other parts of the application.
     """
-    meta: Meta | None = Field(alias="_meta", default=None)
+    meta: Meta | None = field(default=None)
     """
     See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
     for notes on _meta usage.
     """
 
 
+@dataclass(kw_only=True)
 class ListRootsResult(Result):
     """The client's response to a roots/list request from the server.
 
@@ -1873,6 +2007,7 @@ class ListRootsResult(Result):
     roots: list[Root]
 
 
+@dataclass(kw_only=True)
 class RootsListChangedNotification(
     Notification[NotificationParams | None, Literal["notifications/roots/list_changed"]]
 ):
@@ -1890,6 +2025,7 @@ class RootsListChangedNotification(
     params: NotificationParams | None = None
 
 
+@dataclass(kw_only=True)
 class CancelledNotificationParams(NotificationParams):
     request_id: RequestId | None = None
     """
@@ -1904,6 +2040,7 @@ class CancelledNotificationParams(NotificationParams):
     """An optional string describing the reason for the cancellation."""
 
 
+@dataclass(kw_only=True)
 class CancelledNotification(Notification[CancelledNotificationParams, Literal["notifications/cancelled"]]):
     """This notification can be sent by either side to indicate that it is canceling a
     previously-issued request.
@@ -1917,6 +2054,7 @@ class CancelledNotification(Notification[CancelledNotificationParams, Literal["n
     params: CancelledNotificationParams
 
 
+@dataclass(kw_only=True)
 class ElicitCompleteNotificationParams(NotificationParams):
     """Parameters for elicitation completion notifications."""
 
@@ -1924,6 +2062,7 @@ class ElicitCompleteNotificationParams(NotificationParams):
     """The unique identifier of the elicitation that was completed."""
 
 
+@dataclass(kw_only=True)
 class ElicitCompleteNotification(
     Notification[ElicitCompleteNotificationParams, Literal["notifications/elicitation/complete"]]
 ):
@@ -1947,6 +2086,7 @@ class ElicitCompleteNotification(
 ElicitRequestedSchema: TypeAlias = dict[str, Any]
 
 
+@dataclass(kw_only=True)
 class ElicitRequestFormParams(RequestParams):
     """Parameters for form mode elicitation requests.
 
@@ -1970,6 +2110,7 @@ class ElicitRequestFormParams(RequestParams):
     """If specified, the caller requests task-augmented execution (2025-11-25 only)."""
 
 
+@dataclass(kw_only=True)
 class ElicitRequestURLParams(RequestParams):
     """Parameters for URL mode elicitation requests.
 
@@ -2002,6 +2143,7 @@ ElicitRequestParams: TypeAlias = ElicitRequestURLParams | ElicitRequestFormParam
 """Parameters for elicitation requests - either form or URL mode."""
 
 
+@dataclass(kw_only=True)
 class ElicitRequest(Request[ElicitRequestParams, Literal["elicitation/create"]]):
     """A request from the server to elicit additional information from the user via the client."""
 
@@ -2009,6 +2151,7 @@ class ElicitRequest(Request[ElicitRequestParams, Literal["elicitation/create"]])
     params: ElicitRequestParams
 
 
+@dataclass(kw_only=True)
 class ElicitResult(Result):
     """The client's response to an elicitation request."""
 
@@ -2029,6 +2172,7 @@ class ElicitResult(Result):
     """
 
 
+@dataclass(kw_only=True)
 class ElicitationRequiredErrorData(MCPModel):
     """Error data for the -32042 URL-elicitation-required error.
 
@@ -2071,6 +2215,7 @@ tasks extension's `tasks/update` params.
 """
 
 
+@dataclass(kw_only=True)
 class InputRequiredResult(Result):
     """The server needs additional input before the original request can complete (2026-07-28).
 
@@ -2090,21 +2235,13 @@ class InputRequiredResult(Result):
     request_state: str | None = None
     """Opaque state to pass back verbatim when the client retries the original request."""
 
-    @model_validator(mode="after")
-    def _require_one_field(self) -> Self:
-        if not self.input_requests and self.request_state is None:
-            raise ValueError("InputRequiredResult requires at least one of input_requests or request_state")
-        return self
-
 
 # Forward refs to InputResponses; rebuild at import time rather than first use.
-InputResponseRequestParams.model_rebuild()
-ReadResourceRequestParams.model_rebuild()
-GetPromptRequestParams.model_rebuild()
-CallToolRequestParams.model_rebuild()
 
 # Top-level message unions: superset across all supported protocol versions.
 # Per-version validity is recorded in `mcp_types.methods`, not enforced here.
+
+DEFER_BUID = bool(os.getenv('PYDANTIC_DEFER_BUILD'))
 
 ClientRequest = (
     PingRequest
@@ -2128,7 +2265,7 @@ ClientRequest = (
 The 2025-11-25 task requests are deliberately excluded (types-only).
 """
 
-client_request_adapter = TypeAdapter[ClientRequest](ClientRequest)
+client_request_adapter = TypeAdapter[ClientRequest](ClientRequest, config={'defer_build': DEFER_BUID})
 
 
 ClientNotification = (
@@ -2139,11 +2276,11 @@ ClientNotification = (
 `TaskStatusNotification` is deliberately excluded (types-only).
 """
 
-client_notification_adapter = TypeAdapter[ClientNotification](ClientNotification)
+client_notification_adapter = TypeAdapter[ClientNotification](ClientNotification, config={'defer_build': DEFER_BUID})
 
 
 ClientResult = EmptyResult | CreateMessageResult | CreateMessageResultWithTools | ListRootsResult | ElicitResult
-client_result_adapter = TypeAdapter[ClientResult](ClientResult)
+client_result_adapter = TypeAdapter[ClientResult](ClientResult, config={'defer_build': DEFER_BUID})
 
 
 ServerRequest = PingRequest | CreateMessageRequest | ListRootsRequest | ElicitRequest
@@ -2153,7 +2290,7 @@ Live through 2025-11-25 only: 2026-07-28 has no server-to-client JSON-RPC
 requests (these payloads are embedded in `InputRequiredResult` instead).
 """
 
-server_request_adapter = TypeAdapter[ServerRequest](ServerRequest)
+server_request_adapter = TypeAdapter[ServerRequest](ServerRequest, config={'defer_build': DEFER_BUID})
 
 
 ServerNotification = (
@@ -2172,7 +2309,7 @@ ServerNotification = (
 `TaskStatusNotification` is deliberately excluded (types-only).
 """
 
-server_notification_adapter = TypeAdapter[ServerNotification](ServerNotification)
+server_notification_adapter = TypeAdapter[ServerNotification](ServerNotification, config={'defer_build': DEFER_BUID})
 
 
 ServerResult = (
@@ -2195,4 +2332,4 @@ ServerResult = (
 `InputRequiredResult` is deliberately last: both of its fields are optional,
 so an earlier position would shadow other members during union resolution.
 """
-server_result_adapter = TypeAdapter[ServerResult](ServerResult)
+server_result_adapter = TypeAdapter[ServerResult](ServerResult, config={'defer_build': DEFER_BUID})
